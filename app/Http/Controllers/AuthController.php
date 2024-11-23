@@ -77,6 +77,12 @@ public function register(Request $request)
     $name = $request->input('name');
     $avatar_id = $request->input('avatar_id');
 
+    if (empty($mobile)) {
+        $response['success'] = false;
+        $response['message'] = 'mobile is empty.';
+        return response()->json($response, 200);
+    }
+
     // Validate mobile number format
     if (empty($mobile) || strlen($mobile) !== 10) {
         return response()->json([
@@ -312,6 +318,13 @@ public function coins_list(Request $request)
 public function transaction_list(Request $request)
 {
     $user_id = $request->input('user_id');
+
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
 
     $transactions = Transaction::where('user_id', $user_id)
                  ->orderBy('datetime', 'desc')
