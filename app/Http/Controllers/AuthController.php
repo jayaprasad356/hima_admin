@@ -381,15 +381,17 @@ public function avatar_list(Request $request)
         ], 200);
     }
 
-    $avatarData = $avatars->map(function ($avatar) {
-        return [
+    $avatarData = [];
+    foreach ($avatars as $avatar) {
+        $imageUrl = $avatar->image ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+        $avatarData[] = [
             'id' => $avatar->id,
-            'image' => $avatar->image,
             'gender' => $avatar->gender,
+            'image' => $imageUrl,
             'updated_at' => Carbon::parse($avatar->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($avatar->created_at)->format('Y-m-d H:i:s'),
         ];
-    });
+    }
 
     return response()->json([
         'success' => true,

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PointsController;
-use App\Http\Controllers\PlansController;
+use App\Http\Controllers\AvatarController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\TripsController;
 use App\Http\Controllers\BankDetailsController;
@@ -117,7 +117,12 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::put('/chat_points/{chat_points}', [Chat_pointsController::class, 'update'])->name('chat_points.update');
         Route::post('/chat_points', [Chat_pointsController::class, 'store'])->name('chat_points.store');
 
-    
+        Route::get('/avatars', [AvatarController::class, 'index'])->name('avatars.index');
+        Route::get('/avatars/avatars', [AvatarController::class, 'create'])->name('avatars.create');
+        Route::get('/avatars/{avatars}/edit', [AvatarController::class, 'edit'])->name('avatars.edit');
+        Route::delete('/avatars/{avatars}', [AvatarController::class, 'destroy'])->name('avatars.destroy');
+        Route::put('/avatars/{avatars}', [AvatarController::class, 'update'])->name('avatars.update');
+        Route::post('/avatars', [AvatarController::class, 'store'])->name('avatars.store');
 
       //Points  
       Route::get('/plans', [PlansController::class, 'index'])->name('plans.index');
