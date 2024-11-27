@@ -343,6 +343,8 @@ public function transaction_list(Request $request)
             'id' => $transaction->id,
             'user_id' => $transaction->user_id,
             'type' => $transaction->type,
+            'amount' => $transaction->amount,
+            'coins' => $transaction->coins,
             'datetime' => $transaction->datetime,
         ];
     }
