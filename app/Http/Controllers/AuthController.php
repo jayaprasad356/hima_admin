@@ -345,6 +345,7 @@ public function transaction_list(Request $request)
             'type' => $transaction->type,
             'amount' => $transaction->amount,
             'coins' => $transaction->coins,
+            'payment_type' => $transaction->payment_type,
             'datetime' => $transaction->datetime,
         ];
     }
