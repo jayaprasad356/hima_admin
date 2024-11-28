@@ -140,7 +140,7 @@ public function register(Request $request)
         'name' => $user->name,
         'mobile' => $user->mobile,
         'language' => $user->language,
-         'avatar_id' => $user->avatar_id,
+        'avatar_id' => $user->avatar_id,
         'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
         'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
         'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -247,7 +247,8 @@ public function userdetails(Request $request)
             'message' => 'User not found.',
         ], 200);
     }
-
+   $avatar = Avatars::find($user->avatar_id);
+   $gender = $avatar ? $avatar->gender : '';
 
     return response()->json([
         'success' => true,
@@ -256,6 +257,7 @@ public function userdetails(Request $request)
             'id' => $user->id,
             'name' => $user->name,
             'avatar_id' => $user->avatar_id,
+            'gender' => $gender,
             'language' => $user->language,
             'mobile' => $user->mobile ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
@@ -402,4 +404,76 @@ public function avatar_list(Request $request)
         'data' => $avatarData,
     ], 200);
 }
+
+/*public function send_otp(Request $request)
+{
+    $mobile = $request->input('mobile'); 
+    $country_code = $request->input('country_code');
+    $otp = $request->input('otp');
+
+    if (empty($mobile)) {
+        $response['success'] = false;
+        $response['message'] = 'Mobile is empty.';
+        return response()->json($response, 200);
+    }
+
+    if (strlen($mobile) !== 10) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Mobile should be 10 digits.',
+        ], 200);
+    }
+
+    if (empty($country_code)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Country code is empty.',
+        ], 200);
+    }
+
+    if (empty($otp)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'OTP is empty.',
+        ], 200);
+    }
+
+    // Define the API URL and parameters for OTP sending
+    $apiUrl = 'https://api.authkey.io/request'; 
+    $authKey = '64045a300411033f'; // Your authkey here
+    $sid = '14324'; // SID, if applicable
+
+    // Make the HTTP request to the OTP API
+    $response = Http::get($apiUrl, [
+        'authkey' => $authKey,
+        'mobile' => $mobile,
+        'country_code' => $country_code,
+        'sid' => $sid,
+        'otp' => $otp,
+    ]);
+
+    // Check if the API request was successful
+    if ($response->successful()) {
+        // Parse the API response
+        $apiResponse = $response->json();
+        
+        if ($apiResponse['status'] == 'success') {
+            return response()->json([
+                'success' => true,
+                'message' => 'OTP sent successfully.',
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => $apiResponse['message'] ?? 'Failed to send OTP.',
+            ], 200);
+        }
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error communicating with OTP service.',
+        ], 500);
+    }
+}
+    */
 }
