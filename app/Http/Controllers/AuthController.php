@@ -464,7 +464,7 @@ public function send_otp(Request $request)
         } else {
             return response()->json([
                 'success' => false,
-                'message' => $apiResponse['message'] ?? 'Failed to send OTP.',
+                'message' => $apiResponse['Message'] ?? 'Failed to send OTP.',
             ], 200);
         }
     } else {
