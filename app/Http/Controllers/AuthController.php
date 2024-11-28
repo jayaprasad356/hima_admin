@@ -405,7 +405,7 @@ public function avatar_list(Request $request)
     ], 200);
 }
 
-/*public function send_otp(Request $request)
+public function send_otp(Request $request)
 {
     $mobile = $request->input('mobile'); 
     $country_code = $request->input('country_code');
@@ -452,12 +452,11 @@ public function avatar_list(Request $request)
         'otp' => $otp,
     ]);
 
-    // Check if the API request was successful
     if ($response->successful()) {
         // Parse the API response
         $apiResponse = $response->json();
-        
-        if ($apiResponse['status'] == 'success') {
+    
+        if ($apiResponse['Message'] == 'Submitted Successfully') {
             return response()->json([
                 'success' => true,
                 'message' => 'OTP sent successfully.',
@@ -475,5 +474,4 @@ public function avatar_list(Request $request)
         ], 500);
     }
 }
-    */
 }
