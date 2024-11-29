@@ -250,6 +250,7 @@ public function userdetails(Request $request)
    $avatar = Avatars::find($user->avatar_id);
    $gender = $avatar ? $avatar->gender : '';
 
+   $imageUrl = $avatar->image ? asset('storage/app/public/avatars/' . $avatar->image) : '';
     return response()->json([
         'success' => true,
         'message' => 'User details retrieved successfully.',
@@ -257,6 +258,7 @@ public function userdetails(Request $request)
             'id' => $user->id,
             'name' => $user->name,
             'avatar_id' => $user->avatar_id,
+            'image' => $imageUrl,
             'gender' => $gender,
             'language' => $user->language,
             'mobile' => $user->mobile ?? '',
