@@ -542,11 +542,19 @@ public function settings_list(Request $request)
 public function delete_users(Request $request)
 {
     $user_id = $request->input('user_id');
+    $delete_reason = $request->input('delete_reason');
 
     if (empty($user_id)) {
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    if (empty($delete_reason)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'delete_reason is empty.',
         ], 200);
     }
 
@@ -568,7 +576,8 @@ public function delete_users(Request $request)
     $deletedUser->avatar_id = $user->avatar_id;
     $deletedUser->coins = $user->coins;
     $deletedUser->total_coins = $user->total_coins;
-    $deletedUser->datetime = Carbon::now(); 
+    $deletedUser->datetime = Carbon::now();
+    $deletedUser->delete_reason = $delete_reason;
     $deletedUser->save();
 
     $user->delete();

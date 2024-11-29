@@ -15,7 +15,7 @@ class DeletedUsers extends Authenticatable
 
 
     protected $fillable = [
-        'name', 'avatar_id', 'mobile', 'coins', 'total_coins','language','user_id', // Add 'mobile' to the fillable fields
+        'name', 'avatar_id', 'mobile', 'coins', 'total_coins','language','user_id','delete_reason', // Add 'mobile' to the fillable fields
     ];
 
     public function avatars()
