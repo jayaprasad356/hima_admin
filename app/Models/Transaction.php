@@ -14,6 +14,7 @@ class Transaction extends Model
         'type',
         'coins',
         'datetime',
+        'payment_type',
     ];
 
     public function user()

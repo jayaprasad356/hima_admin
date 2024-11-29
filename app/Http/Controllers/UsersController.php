@@ -105,11 +105,11 @@ class UsersController extends Controller
         $user->total_coins += $request->input('coins');
         $user->save();
     
-        // Create a new transaction
         \App\Models\Transaction::create([
             'user_id' => $user->id,
-            'type' => 'Credit',
+            'type' => 'add_coins',
             'coins' => $request->input('coins'),
+            'payment_type' => 'Credit',
             'datetime' => now(),
         ]);
       
