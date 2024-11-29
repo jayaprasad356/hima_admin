@@ -191,6 +191,7 @@ public function update_profile(Request $request)
             'message' => 'user not found.',
         ], 200);
     }
+ 
     if (empty($avatar_id)) {
         return response()->json([
             'success' => false,
@@ -198,14 +199,15 @@ public function update_profile(Request $request)
         ], 200);
     }
 
-    $user = Users::find($avatar_id);
+    $avatar = Avatars::find($avatar_id);
 
-    if (!$user) {
+    if (!$avatar) {
         return response()->json([
             'success' => false,
-            'message' => 'avatar_id not found.',
+            'message' => 'avatar not found.',
         ], 200);
     }
+
 
     $name = $request->input('name');
 
@@ -221,7 +223,7 @@ public function update_profile(Request $request)
     if ($name !== null) {
         $user->name = $name;
     }
-
+    $user->avatar_id = $avatar_id;
     $user->datetime = now(); 
     $user->save();
 

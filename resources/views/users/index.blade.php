@@ -2,9 +2,6 @@
 
 @section('title', 'User Management')
 @section('content-header', 'User Management')
-@section('content-actions')
-    <a href="{{ route('users.create') }}" class="btn btn-success"><i class="fas fa-plus"></i> Add New Users</a>
-@endsection
 
 @section('css')
     <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css') }}">
@@ -17,16 +14,6 @@
         <div class="row mb-4">
             <div class="col-md-8">
                 <!-- User Filter Dropdowns -->
-                <form id="user-filter-form" action="{{ route('users.index') }}" method="GET" class="form-inline">
-                    <div class="form-group mr-3">
-                        <label for="verified-filter" class="mr-2">Filter by Verified Status:</label>
-                        <select name="verified" id="verified-filter" class="form-control">
-                            <option value="">All</option>
-                            <option value="1" {{ request()->input('verified') === '1' ? 'selected' : '' }}>Verified</option>
-                            <option value="0" {{ request()->input('verified') === '0' ? 'selected' : '' }}>Not Verified</option>
-                        </select>
-                    </div>
-                </form>
             </div>
             <div class="col-md-4 text-right">
                 <!-- Search Form -->
@@ -46,32 +33,13 @@
                     <tr>
                     <th>Actions</th>
                     <th>ID <i class="fas fa-sort"></i></th>
-                    <th>Profile</th>
-                    <th>Cover Image</th>
                     <th>Name <i class="fas fa-sort"></i></th>
-                    <th>Unique Name <i class="fas fa-sort"></i></th>
-                    <th>Email <i class="fas fa-sort"></i></th>
                     <th>Mobile <i class="fas fa-sort"></i></th>
-                    <th>Age <i class="fas fa-sort"></i></th>
-                    <th>Gender <i class="fas fa-sort"></i></th>
-                    <th>State <i class="fas fa-sort"></i></th>
-                    <th>City <i class="fas fa-sort"></i></th>
-                    <th>Profession <i class="fas fa-sort"></i></th>
                     <th>Language <i class="fas fa-sort"></i></th>
-                    <th>Refer Code <i class="fas fa-sort"></i></th>
-                    <th>Referred By <i class="fas fa-sort"></i></th>
-                    <th>Points <i class="fas fa-sort"></i></th>
-                    <th>Balance <i class="fas fa-sort"></i></th>
-                    <th>Total Points <i class="fas fa-sort"></i></th>
-                    <th>Introduction <i class="fas fa-sort"></i></th>
-                    <th>Verified <i class="fas fa-sort"></i></th>
-                    <th>Online Status <i class="fas fa-sort"></i></th>
-                    <th>Dummy <i class="fas fa-sort"></i></th>
-                    <th>Message Notify <i class="fas fa-sort"></i></th>
-                    <th>Add Friend Notify <i class="fas fa-sort"></i></th>
-                    <th>View Notify <i class="fas fa-sort"></i></th>
-                    <th>Profile Verified <i class="fas fa-sort"></i></th>
-                    <th>Cover Image Verified <i class="fas fa-sort"></i></th>
+                    <th>Gender<i class="fas fa-sort"></i></th>
+                    <th>profile<i class="fas fa-sort"></i></th>
+                    <th>Coins <i class="fas fa-sort"></i></th>
+                    <th>Total Coins <i class="fas fa-sort"></i></th>
                     <th>DateTime <i class="fas fa-sort"></i></th>
                     </tr>
                 </thead>
@@ -83,89 +51,22 @@
                             <button class="btn btn-danger btn-delete" data-url="{{route('users.destroy', $user)}}"><i class="fas fa-trash"></i></button>
                         </td>
                         <td>{{$user->id}}</td>
-                        <td>
-    @if(Str::startsWith($user->profile, ['http://', 'https://']))
-        <a href="{{ asset('storage/app/public/users/' . $user->profile) }}" data-lightbox="profile-{{ $user->id }}">
-        <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ $user->profile }}" alt=""
-            style="max-width: 100px; max-height: 100px;">
-    @else
-    <a href="{{ asset('storage/app/public/users/' . $user->profile) }}" data-lightbox="profile-{{ $user->id }}">
-        <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ asset('storage/app/public/users/' . $user->profile) }}" alt=""
-            style="max-width: 100px; max-height: 100px;">
-    @endif
-</td>
-<td>
-    @if(Str::startsWith($user->cover_img, ['http://', 'https://']))
-        <a href="{{ asset('storage/app/public/users/' . $user->cover_img) }}" data-lightbox="cover_img-{{ $user->id }}">
-        <img class="customer-img img-thumbnail img-fluid " src="{{ $user->cover_img }}" alt=""
-            style="max-width: 100px; max-height: 100px;">
-    @else
-    <a href="{{ asset('storage/app/public/users/' . $user->cover_img) }}" data-lightbox="cover_img-{{ $user->id }}">
-        <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/users/' . $user->cover_img) }}" alt=""
-            style="max-width: 100px; max-height: 100px;">
-    @endif
-</td>
+                   
                         <td>{{$user->name}}</td>
-                        <td>{{$user->unique_name}}</td>
-                        <td>{{$user->email}}</td>
                         <td>{{$user->mobile}}</td>
-                        <td>{{$user->age}}</td>
-                        <td>{{$user->gender}}</td>
-                        <td>{{$user->state}}</td>
-                        <td>{{$user->city}}</td>
-                        <td>{{ optional($user->professions)->profession }}</td>
                         <td>{{$user->language}}</td>
-                        <td>{{$user->refer_code}}</td>
-                        <td>{{$user->referred_by}}</td>
-                        <td>{{$user->points}}</td>
-                        <td>{{$user->balance}}</td>
-                        <td>{{$user->total_points}}</td>
-                        <td>{{$user->introduction}}</td>
+                        <td>{{ optional($user->avatars)->gender }}</td>
                         <td>
-                            <span style="color: {{ $user->verified == 1 ? 'green' : ($user->verified == 2 ? '#FF0000' : '#1E90FF') }};">
-                                {{ $user->verified == 1 ? 'Verified' : ($user->verified == 2 ? 'Rejected' : 'Not-Verified') }}
-                            </span>
+                            @if ($user->avatars && $user->avatars->image) <!-- Check if avatar and image exist -->
+                                <a href="{{ asset('storage/app/public/avatars/' . $user->avatars->image) }}" data-lightbox="image-{{ $user->id }}">
+                                    <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/avatars/' . $user->avatars->image) }}" alt="{{ $user->name }}" style="max-width: 100px; max-height: 100px;">
+                                </a>
+                            @else
+                                <span>No Avatar</span> <!-- Fallback if no image is found -->
+                            @endif
                         </td>
-
-                        <td>
-                        <span class="{{ $user->online_status == 1 ? 'text-enable' : 'text-disable' }}">
-                                {{ $user->online_status == 1 ? 'Enable' : 'Disable' }}
-                            </span>
-                        </td>
-                        <td>
-                        <span class="{{ $user->dummy == 1 ? 'text-enable' : 'text-disable' }}">
-                                {{ $user->dummy == 1 ? 'Enable' : 'Disable' }}
-                            </span>
-                        </td>
-                        <td>
-                        <span class="{{ $user->view_notify == 1 ? 'text-enable' : 'text-disable' }}">
-                                {{ $user->view_notify == 1 ? 'Enable' : 'Disable' }}
-                            </span>
-                        </td>
-
-                        <td>
-                        <span class="{{ $user->add_friend_notify == 1 ? 'text-enable' : 'text-disable' }}">
-                                {{ $user->add_friend_notify == 1 ? 'Enable' : 'Disable' }}
-                            </span>
-                        </td>
-
-                        <td>
-                        <span class="{{ $user->view_notify == 1 ? 'text-enable' : 'text-disable' }}">
-                                {{ $user->view_notify == 1 ? 'Enable' : 'Disable' }}
-                            </span>
-                        </td>
-
-                        <td>
-                        <span class="{{ $user->profile_verified == 1 ? 'text-enable' : 'text-disable' }}">
-                                {{ $user->profile_verified == 1 ? 'Enable' : 'Disable' }}
-                            </span>
-                        </td>
-                        <td>
-                        <span class="{{ $user->cover_image_verified == 1 ? 'text-enable' : 'text-disable' }}">
-                                {{ $user->cover_image_verified == 1 ? 'Enable' : 'Disable' }}
-                            </span>
-                        </td>
-            
+                        <td>{{$user->coins}}</td>
+                        <td>{{$user->total_coins}}</td>
                         <td>{{$user->datetime}}</td>
                     </tr>
                     @endforeach
@@ -199,7 +100,7 @@
     // Load initial parameters
     const queryParams = getQueryParams();
     $('#search-input').val(queryParams.search || '');
-    $('#verified-filter').val(queryParams.verified || '');
+
 
     // Handle search input with debounce
     let debounceTimeout;
@@ -210,10 +111,6 @@
         }, 300); // Adjust delay as needed
     });
 
-    // Handle status filter change
-    $('#verified-filter').change(function () {
-        filterUsers();
-    });
 
     let debounceTimer;
 
@@ -222,9 +119,8 @@ function filterUsers() {
 
     debounceTimer = setTimeout(function() {
         let search = $('#search-input').val();
-        let verified = $('#verified-filter').val();
 
-        window.location.search = `search=${encodeURIComponent(search)}&verified=${encodeURIComponent(verified)}`;
+        window.location.search = `search=${encodeURIComponent(search)}`;
     }, 500); // Adjust the delay (in milliseconds) as needed
 }
 

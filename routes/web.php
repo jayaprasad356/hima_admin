@@ -76,8 +76,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::delete('/users/{users}', [UsersController::class, 'destroy'])->name('users.destroy');
     Route::put('/users/{users}', [UsersController::class, 'update'])->name('users.update');
     Route::post('/users', [UsersController::class, 'store'])->name('users.store');
-    Route::get('/users/{id}/add-points', [UsersController::class, 'addPointsForm'])->name('users.add_points');
-    Route::post('/users/{id}/add-points', [UsersController::class, 'addPoints'])->name('users.store_points');
+    Route::get('/users/{id}/add-coins', [UsersController::class, 'addCoinsForm'])->name('users.add_coins');
+    Route::post('/users/{id}/add-coins', [UsersController::class, 'addCoins'])->name('users.store_coins');
 
 
    

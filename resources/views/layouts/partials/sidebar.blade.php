@@ -30,6 +30,12 @@
                     </a>
                 </li>
                 <li class="nav-item has-treeview">
+                    <a href="{{ route('users.index') }}" class="nav-link {{ activeSegment('users') }}">
+                        <i class="nav-icon fas fa-users"></i>
+                        <p>Users</p>
+                    </a>
+                </li>
+                <li class="nav-item has-treeview">
                     <a href="{{ route('avatars.index') }}" class="nav-link {{ activeSegment('avatars') }}">
                     <i class="nav-icon fas fa-user-circle"></i>
                     <p>Avatar</p>

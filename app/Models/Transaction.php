@@ -12,9 +12,8 @@ class Transaction extends Model
     protected $fillable = [
         'user_id',
         'type',
-        'points',
+        'coins',
         'datetime',
-        'amount',
     ];
 
     public function user()
