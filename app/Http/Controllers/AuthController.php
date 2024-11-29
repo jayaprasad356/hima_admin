@@ -52,7 +52,10 @@ class AuthController extends Controller
             $response['message'] = 'mobile not registered.';
             return response()->json($response, 200);
         }
-
+        $avatar = Avatars::find($user->avatar_id);
+        $gender = $avatar ? $avatar->gender : '';
+     
+        $imageUrl = $avatar->image ? asset('storage/app/public/avatars/' . $avatar->image) : '';
 
     return response()->json([
         'success' => true,
@@ -64,6 +67,8 @@ class AuthController extends Controller
             'language' => $user->language,
             'mobile' => $user->mobile,
             'avatar_id' => $user->avatar_id,
+            'image' => $imageUrl,
+            'gender' => $gender,
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -135,12 +140,19 @@ public function register(Request $request)
     $user->datetime = Carbon::now();
     $user->save(); 
 
+    $avatar = Avatars::find($user->avatar_id);
+    $gender = $avatar ? $avatar->gender : '';
+ 
+    $imageUrl = $avatar->image ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+
     $userDetails = [
         'id' => $user->id,
         'name' => $user->name,
         'mobile' => $user->mobile,
         'language' => $user->language,
         'avatar_id' => $user->avatar_id,
+        'image' => $imageUrl,
+        'gender' => $gender,
         'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
         'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
         'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -213,6 +225,11 @@ public function update_profile(Request $request)
     $user->datetime = now(); 
     $user->save();
 
+    $avatar = Avatars::find($user->avatar_id);
+   $gender = $avatar ? $avatar->gender : '';
+
+   $imageUrl = $avatar->image ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+
     return response()->json([
         'success' => true,
         'message' => 'User details updated successfully.',
@@ -222,6 +239,8 @@ public function update_profile(Request $request)
             'language' => $user->language,
             'mobile' => $user->mobile,
             'avatar_id' => $user->avatar_id,
+            'image' => $imageUrl,
+            'gender' => $gender,
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
