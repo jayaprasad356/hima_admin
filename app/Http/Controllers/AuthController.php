@@ -71,6 +71,7 @@ class AuthController extends Controller
             'avatar_id' => $user->avatar_id,
             'image' => $imageUrl,
             'gender' => $gender,
+            'interests' => $user->interests ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -177,11 +178,19 @@ public function update_profile(Request $request)
 {
     $user_id = $request->input('user_id');
     $avatar_id = $request->input('avatar_id');
+    $interests = $request->input('interests');
 
     if (empty($user_id)) {
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    if (empty($interests)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'interests is empty.',
         ], 200);
     }
 
@@ -225,6 +234,7 @@ public function update_profile(Request $request)
     if ($name !== null) {
         $user->name = $name;
     }
+    $user->interests = $interests;
     $user->avatar_id = $avatar_id;
     $user->datetime = now(); 
     $user->save();
@@ -245,6 +255,7 @@ public function update_profile(Request $request)
             'avatar_id' => $user->avatar_id,
             'image' => $imageUrl,
             'gender' => $gender,
+            'interests' => $user->interests,
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -285,6 +296,7 @@ public function userdetails(Request $request)
             'gender' => $gender,
             'language' => $user->language,
             'mobile' => $user->mobile ?? '',
+            'interests' => $user->interests ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
