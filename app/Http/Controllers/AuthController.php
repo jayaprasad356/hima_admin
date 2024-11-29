@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Users;
 use App\Models\avatars;
 use App\Models\coins;   
-use App\Models\Transaction; 
+use App\Models\Transaction;
+use App\Models\DeletedUsers;  
 use Carbon\Carbon;
+use App\Models\News; 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -368,10 +370,11 @@ public function transaction_list(Request $request)
             'id' => $transaction->id,
             'user_id' => $transaction->user_id,
             'type' => $transaction->type,
-            'amount' => $transaction->amount,
+            'amount' => $transaction->amount ?? '', 
             'coins' => $transaction->coins,
-            'payment_type' => $transaction->payment_type,
-            'datetime' => $transaction->datetime,
+            'payment_type' => $transaction->payment_type ?? '',
+            'datetime' => $transaction->datetime, // Full datetime (with time)
+            'date' => Carbon::parse($transaction->datetime)->format('M d'), // Format: "Nov 29"
         ];
     }
 
@@ -497,4 +500,158 @@ public function send_otp(Request $request)
         ], 500);
     }
 }
+public function settings_list(Request $request)
+{
+    // Retrieve all news settings
+    $news = News::all();
+
+    if ($news->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No settings found.',
+        ], 200);
+    }
+
+    $newsData = [];
+    foreach ($news as $item) {
+        $newsData[] = [
+            'id' => $item->id,
+            'privacy_policy' => $item->privacy_policy,
+            'support_mail' => $item->support_mail,
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Settings listed successfully.',
+        'data' => $newsData,
+    ], 200);
+}
+public function delete_users(Request $request)
+{
+    $user_id = $request->input('user_id');
+
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 200);
+    }
+
+    $deletedUser = new DeletedUsers();
+    $deletedUser->user_id = $user->id;
+    $deletedUser->name = $user->name;
+    $deletedUser->mobile = $user->mobile;
+    $deletedUser->language = $user->language;
+    $deletedUser->avatar_id = $user->avatar_id;
+    $deletedUser->coins = $user->coins;
+    $deletedUser->total_coins = $user->total_coins;
+    $deletedUser->datetime = Carbon::now(); 
+    $deletedUser->save();
+
+    $user->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User deleted successfully.',
+    ], 200);
+}
+
+public function user_validations(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $name = $request->input('name');
+
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    if (empty($name)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'name is empty.',
+        ], 200);
+    }
+
+    if (strlen($name) < 4 || strlen($name) > 10) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Name must be between 4 and 10 characters.',
+        ], 200);
+    }
+
+    if (!preg_match('/^[a-zA-Z0-9]+$/', $name)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Name can only contain letters (a-z) and numbers (0-9).',
+        ], 200);
+    }
+
+    if (preg_match('/\d{3,}/', $name)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Name cannot contain 3 or more consecutive numbers.',
+        ], 200);
+    }
+
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 200);
+    }
+
+    if (Users::where('name', $name)->where('id', '!=', $user_id)->exists()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'The provided name already exists.',
+        ], 200);
+    }
+
+
+    $user->name = $name;
+    $user->datetime = now(); 
+    $user->save();
+
+
+    $avatar = Avatars::find($user->avatar_id);
+    $gender = $avatar ? $avatar->gender : '';
+
+
+    $imageUrl = $avatar && $avatar->image 
+        ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User details updated successfully.',
+        'data' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'language' => $user->language,
+            'mobile' => $user->mobile,
+            'avatar_id' => $user->avatar_id,
+            'image' => $imageUrl,
+            'gender' => $gender,
+            'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
+        ],
+    ], 200);
+}
+
 }

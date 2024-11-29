@@ -39,7 +39,13 @@
                     <a href="{{ route('avatars.index') }}" class="nav-link {{ activeSegment('avatars') }}">
                     <i class="nav-icon fas fa-user-circle"></i>
                     <p>Avatar</p>
+                    </a>
+                </li>
 
+                <li class="nav-item has-treeview">
+                    <a href="{{ route('news.edit') }}" class="nav-link {{ activeSegment('news') }}">
+                        <i class="nav-icon fas fa-gear"></i>
+                        <p>Settings</p>
                     </a>
                 </li>
 
