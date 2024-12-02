@@ -17,7 +17,7 @@ Route::post('send_otp', [AuthController::class, 'send_otp']);
 Route::post('settings_list', [AuthController::class, 'settings_list']);
 Route::post('delete_users', [AuthController::class, 'delete_users']);
 Route::post('user_validations', [AuthController::class, 'user_validations']);
-Route::post('speech_list', [AuthController::class, 'speech_list']);
+Route::post('speech_text', [AuthController::class, 'speech_text']);
 Route::post('update_voice', [AuthController::class, 'update_voice']);
 
 

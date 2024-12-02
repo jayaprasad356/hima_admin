@@ -830,7 +830,7 @@ public function speech_text(Request $request)
     if ($speech_text->isEmpty()) {
         return response()->json([
             'success' => false,
-            'message' => 'No settings found.',
+            'message' => 'No Speech Text found.',
         ], 200);
     }
 
