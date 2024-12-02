@@ -6,7 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Users;
 use App\Models\avatars;
-use App\Models\coins;   
+use App\Models\coins;
+use App\Models\speech_texts;   
 use App\Models\Transaction;
 use App\Models\DeletedUsers;  
 use Carbon\Carbon;
@@ -58,6 +59,7 @@ class AuthController extends Controller
         $gender = $avatar ? $avatar->gender : '';
      
         $imageUrl = $avatar->image ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+        $voicePath = $user && $user->voice ? asset('storage/app/public/voices/' . $user->voice) : '';
 
     return response()->json([
         'success' => true,
@@ -66,12 +68,15 @@ class AuthController extends Controller
         'data' => [
             'id' => $user->id,
             'name' => $user->name,
+            'user_gender' => $user->gender,
             'language' => $user->language,
             'mobile' => $user->mobile,
             'avatar_id' => $user->avatar_id,
             'image' => $imageUrl,
             'gender' => $gender,
             'interests' => $user->interests ?? '',
+            'describe_yourself' => $user->describe_yourself ?? '',
+            'voice' => $voicePath ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -84,15 +89,20 @@ public function register(Request $request)
     $language = $request->input('language');
     $name = $request->input('name');
     $avatar_id = $request->input('avatar_id');
+    $gender = $request->input('gender');
+    $age = $request->input('age');
+    $interests = $request->input('interests');
+    $describe_yourself = $request->input('describe_yourself');
 
+    // Check if mobile number is empty or invalid
     if (empty($mobile)) {
-        $response['success'] = false;
-        $response['message'] = 'mobile is empty.';
-        return response()->json($response, 200);
+        return response()->json([
+            'success' => false,
+            'message' => 'Mobile is empty.',
+        ], 200);
     }
 
-    // Validate mobile number format
-    if (empty($mobile) || strlen($mobile) !== 10) {
+    if (strlen($mobile) !== 10) {
         return response()->json([
             'success' => false,
             'message' => 'Mobile number should be 10 digits.',
@@ -106,6 +116,7 @@ public function register(Request $request)
         ], 200); 
     }
 
+    // Check if language is empty
     if (empty($language)) {
         return response()->json([
             'success' => false,
@@ -113,10 +124,11 @@ public function register(Request $request)
         ], 200);
     }
 
+    // Check if avatar ID is empty
     if (empty($avatar_id)) {
         return response()->json([
             'success' => false,
-            'message' => 'avatar_id is empty.',
+            'message' => 'Avatar ID is empty.',
         ], 200);
     }
 
@@ -125,11 +137,46 @@ public function register(Request $request)
     if (!$avatar) {
         return response()->json([
             'success' => false,
-            'message' => 'avatar not found.',
+            'message' => 'Avatar not found.',
         ], 200);
     }
 
+    if (empty($gender)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gender is empty.',
+        ], 200);
+    }
 
+    if (!in_array(strtolower($gender), ['male', 'female'])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gender must be either male or female.',
+        ], 200);
+    }
+
+    if (strtolower($gender) === 'female') {
+        if (empty($age)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Age is required for female users.',
+            ], 200);
+        }
+        if (empty($interests)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Interests are required for female users.',
+            ], 200);
+        }
+        if (empty($describe_yourself)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Describe Yourself is required for female users.',
+            ], 200);
+        }
+    }
+
+    // Generate a random name if not provided
     if (empty($name)) {
         $name = $this->generateRandomName(); 
     }
@@ -140,22 +187,30 @@ public function register(Request $request)
     $user->mobile = $mobile;
     $user->language = $language;
     $user->avatar_id = $avatar_id;
+    $user->gender = $gender;
+    $user->age = $age;
+    $user->interests = $interests;
+    $user->describe_yourself = $describe_yourself;
     $user->datetime = Carbon::now();
     $user->save(); 
 
     $avatar = Avatars::find($user->avatar_id);
-    $gender = $avatar ? $avatar->gender : '';
- 
-    $imageUrl = $avatar->image ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+    $imageUrl = $avatar ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+    $voicePath = $user && $user->voice ? asset('storage/app/public/voices/' . $user->voice) : '';
 
     $userDetails = [
         'id' => $user->id,
         'name' => $user->name,
+        'user_gender' => $user->gender,
         'mobile' => $user->mobile,
         'language' => $user->language,
         'avatar_id' => $user->avatar_id,
         'image' => $imageUrl,
         'gender' => $gender,
+        'age' => $user->age,
+        'interests' => $user->interests,
+        'describe_yourself' =>  $user->describe_yourself ?? '',
+        'voice' =>  $voicePath ?? '',
         'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
         'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
         'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -243,6 +298,7 @@ public function update_profile(Request $request)
    $gender = $avatar ? $avatar->gender : '';
 
    $imageUrl = $avatar->image ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+   $voicePath = $user && $user->voice ? asset('storage/app/public/voices/' . $user->voice) : '';
 
     return response()->json([
         'success' => true,
@@ -250,12 +306,16 @@ public function update_profile(Request $request)
         'data' => [
             'id' => $user->id,
             'name' => $user->name,
+            'user_gender' => $user->gender,
             'language' => $user->language,
             'mobile' => $user->mobile,
             'avatar_id' => $user->avatar_id,
             'image' => $imageUrl,
             'gender' => $gender,
+             'age' => $user-> age ?? '',
             'interests' => $user->interests,
+            'describe_yourself' => $user-> describe_yourself ?? '',
+             'voice' => $voicePath ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -285,18 +345,23 @@ public function userdetails(Request $request)
    $gender = $avatar ? $avatar->gender : '';
 
    $imageUrl = $avatar->image ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+   $voicePath = $user && $user->voice ? asset('storage/app/public/voices/' . $user->voice) : '';
     return response()->json([
         'success' => true,
         'message' => 'User details retrieved successfully.',
         'data' => [
             'id' => $user->id,
             'name' => $user->name,
+            'user_gender' => $user->gender,
             'avatar_id' => $user->avatar_id,
             'image' => $imageUrl,
             'gender' => $gender,
             'language' => $user->language,
+            'age' => $user-> age ?? '',
             'mobile' => $user->mobile ?? '',
             'interests' => $user->interests ?? '',
+            'describe_yourself' => $user-> describe_yourself ?? '',
+            'voice' => $voicePath ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -530,6 +595,7 @@ public function settings_list(Request $request)
             'id' => $item->id,
             'privacy_policy' => $item->privacy_policy,
             'support_mail' => $item->support_mail,
+            'demo_video' => $item->demo_video,
         ];
     }
 
@@ -656,6 +722,8 @@ public function user_validations(Request $request)
 
     $imageUrl = $avatar && $avatar->image 
         ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+    $voicePath = $user && $user->voice 
+        ? asset('storage/app/public/voices/' . $user->voice) : '';
 
     return response()->json([
         'success' => true,
@@ -663,15 +731,121 @@ public function user_validations(Request $request)
         'data' => [
             'id' => $user->id,
             'name' => $user->name,
-            'language' => $user->language,
-            'mobile' => $user->mobile,
+            'user_gender' => $user->gender,
             'avatar_id' => $user->avatar_id,
             'image' => $imageUrl,
             'gender' => $gender,
+            'language' => $user->language,
+            'age' => $user-> age ?? '',
+            'mobile' => $user->mobile ?? '',
+            'interests' => $user->interests ?? '',
+            'describe_yourself' => $user-> describe_yourself ?? '',
+            'voice' => $voicePath ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
         ],
+    ], 200);
+}
+
+public function update_voice(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $voice = $request->file('voice'); 
+
+    // Validate user_id and voice
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    if (empty($voice)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'voice is empty.',
+        ], 200);
+    }
+
+    if ($voice->getClientOriginalExtension() !== 'mp3') {
+        return response()->json([
+            'success' => false,
+            'message' => 'The voice file must be an MP3.',
+        ], 200);
+    }
+
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 200);
+    }
+
+    $voicePath = $voice->store('voices', 'public');
+
+    $user->voice = basename($voicePath);
+    $user->datetime = now(); 
+    $user->save();
+
+    $avatar = Avatars::find($user->avatar_id);
+    $gender = $avatar ? $avatar->gender : '';
+
+    $imageUrl = $avatar && $avatar->image 
+        ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+    $voicePath = $user && $user->voice 
+        ? asset('storage/app/public/voices/' . $user->voice) : '';
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User details updated successfully.',
+        'data' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'user_gender' => $user->gender,
+            'avatar_id' => $user->avatar_id,
+            'image' => $imageUrl,
+            'gender' => $gender,
+            'language' => $user->language,
+            'age' => $user-> age ?? '',
+            'mobile' => $user->mobile ?? '',
+            'interests' => $user->interests ?? '',
+            'describe_yourself' => $user-> describe_yourself ?? '',
+            'voice' => $voicePath, 
+            'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
+        ],
+    ], 200);
+}
+
+
+public function speech_text(Request $request)
+{
+    // Retrieve all news settings
+    $speech_text = Speech_texts::all();
+
+    if ($speech_text->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No settings found.',
+        ], 200);
+    }
+
+    $speech_textData = [];
+    foreach ($speech_text as $item) {
+        $speech_textData[] = [
+            'id' => $item->id,
+            'text' => $item->text,
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Speech Text listed successfully.',
+        'data' => $speech_textData,
     ], 200);
 }
 

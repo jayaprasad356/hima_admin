@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class News extends Model
+class Speech_texts extends Model
 {
     protected $fillable = [
-        'privacy_policy','support_mail','demo_video',
+        'text',
     ];
 }   

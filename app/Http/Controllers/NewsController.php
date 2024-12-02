@@ -19,11 +19,13 @@ class NewsController extends Controller
         $request->validate([
             'privacy_policy' => 'required|string',
             'support_mail' => 'required|string',
+            'demo_video' => 'required|string',
         ]);
 
         $news = News::findOrFail(1); // Again, assuming ID 1 for simplicity
         $news->privacy_policy = $request->input('privacy_policy');
         $news->support_mail = $request->input('support_mail');
+        $news->demo_video = $request->input('demo_video');
     
 
         if ($news->save()) {

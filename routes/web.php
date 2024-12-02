@@ -34,6 +34,7 @@ use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\BulkUserController;
 use App\Http\Controllers\WalletsController;
 use App\Http\Controllers\WithdrawalsController;
+use App\Http\Controllers\SpeechTextController;
 use App\Models\BankDetails;
 use App\Models\UserNotifications;
 use Illuminate\Support\Facades\Route;
@@ -196,6 +197,10 @@ Route::prefix('admin')->middleware('auth')->group(function () {
                Route::get('/feedbacks', [FeedbacksController::class, 'index'])->name('feedbacks.index');
                Route::delete('/feedbacks/{feedback}', [FeedbacksController::class, 'destroy'])->name('feedbacks.destroy');
                     
+               Route::get('/speech_texts', [SpeechTextController::class, 'index'])->name('speech_texts.index');
+               Route::delete('/speech_texts/{speech_texts}', [SpeechTextController::class, 'destroy'])->name('speech_texts.destroy');
+                    
+
                          //Recharge Trans  
                Route::get('/recharge_trans', [Recharge_transController::class, 'index'])->name('recharge_trans.index');
                Route::delete('/recharge_trans/{recharge_trans}', [Recharge_transController::class, 'destroy'])->name('recharge_trans.destroy');

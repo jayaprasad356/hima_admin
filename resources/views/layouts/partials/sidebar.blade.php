@@ -43,6 +43,13 @@
                 </li>
 
                 <li class="nav-item has-treeview">
+                    <a href="{{ route('speech_texts.index') }}" class="nav-link {{ activeSegment('speech_text') }}">
+                    <i class="nav-icon fas fa-file"></i>
+                    <p>Speech Text</p>
+                    </a>
+                </li>
+
+                <li class="nav-item has-treeview">
                     <a href="{{ route('news.edit') }}" class="nav-link {{ activeSegment('news') }}">
                         <i class="nav-icon fas fa-gear"></i>
                         <p>Settings</p>

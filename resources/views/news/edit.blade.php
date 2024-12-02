@@ -24,6 +24,11 @@
                 <input type="email" class="form-control" id="support_mail" name="support_mail" value="{{ $news->support_mail }}" required>
             </div>
 
+            <div class="form-group">
+                <label for="demo_video">Demo Video</label>
+                <input type="text" class="form-control" id="demo_video" name="demo_video" value="{{ $news->demo_video }}" required>
+            </div>
+
             <div class="box-footer">
                 <button type="submit" class="btn btn-primary">Update</button>
             </div>

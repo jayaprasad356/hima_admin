@@ -69,6 +69,10 @@ class UsersController extends Controller
         $users->avatar_id = $request->avatar_id;
         $users->mobile = $request->mobile;
         $users->language = $request->language; 
+        $users->age = $request->age;
+        $users->interests = $request->interests;
+        $users->describe_yourself = $request->describe_yourself;
+        $users->voice = $request->voice; 
         $users->datetime = now();
    
     
