@@ -78,6 +78,7 @@ class AuthController extends Controller
             'interests' => $user->interests ?? '',
             'describe_yourself' => $user->describe_yourself ?? '',
             'voice' => $voicePath ?? '',
+            'status' => $user->status ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -212,6 +213,7 @@ public function register(Request $request)
         'interests' => $user->interests,
         'describe_yourself' =>  $user->describe_yourself ?? '',
         'voice' =>  $voicePath ?? '',
+        'status' => 1,
         'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
         'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
         'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -317,6 +319,7 @@ public function update_profile(Request $request)
             'interests' => $user->interests,
             'describe_yourself' => $user-> describe_yourself ?? '',
              'voice' => $voicePath ?? '',
+             'status' => $user->status ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -363,6 +366,7 @@ public function userdetails(Request $request)
             'interests' => $user->interests ?? '',
             'describe_yourself' => $user-> describe_yourself ?? '',
             'voice' => $voicePath ?? '',
+            'status' => $user->status ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -742,6 +746,7 @@ public function user_validations(Request $request)
             'interests' => $user->interests ?? '',
             'describe_yourself' => $user-> describe_yourself ?? '',
             'voice' => $voicePath ?? '',
+            'status' => $user->status ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -788,6 +793,7 @@ public function update_voice(Request $request)
     $voicePath = $voice->store('voices', 'public');
 
     $user->voice = basename($voicePath);
+    $user->status = 1; 
     $user->datetime = now(); 
     $user->save();
 
@@ -815,6 +821,7 @@ public function update_voice(Request $request)
             'interests' => $user->interests ?? '',
             'describe_yourself' => $user-> describe_yourself ?? '',
             'voice' => $voicePath, 
+            'status' => $user->status ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -907,6 +914,7 @@ public function female_users_list(Request $request)
             'interests' => $User->interests ?? '',
             'describe_yourself' => $User->describe_yourself ?? '',
             'voice' => $voicePath ?? '',
+            'status' => $User->status ?? '',
             'datetime' => Carbon::parse($User->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($User->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($User->created_at)->format('Y-m-d H:i:s'),

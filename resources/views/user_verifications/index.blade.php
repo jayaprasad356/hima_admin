@@ -44,7 +44,7 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Checkbox</th>
+                       
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>User Name <i class="fas fa-sort"></i></th>
                         <th>User Mobile <i class="fas fa-sort"></i></th>
@@ -55,7 +55,7 @@
                 <tbody>
                     @foreach ($users as $user)
                     <tr>
-                        <td><input type="checkbox" class="checkbox" data-id="{{ $user->id }}"></td>
+                       
                         <td>{{ $user->id }}</td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->mobile }}</td>
