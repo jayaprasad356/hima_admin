@@ -58,8 +58,8 @@ class AuthController extends Controller
         }
         $avatar = Avatars::find($user->avatar_id);
         $gender = $avatar ? $avatar->gender : '';
-     
-        $imageUrl = $avatar->image ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+
+        $imageUrl = ($avatar && $avatar->image) ? asset('storage/app/public/avatars/' . $avatar->image) : '';
         $voicePath = $user && $user->voice ? asset('storage/app/public/voices/' . $user->voice) : '';
 
     return response()->json([
@@ -197,7 +197,7 @@ public function register(Request $request)
     $user->save(); 
 
     $avatar = Avatars::find($user->avatar_id);
-    $imageUrl = $avatar ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+    $imageUrl = ($avatar && $avatar->image) ? asset('storage/app/public/avatars/' . $avatar->image) : '';
     $voicePath = $user && $user->voice ? asset('storage/app/public/voices/' . $user->voice) : '';
 
     $userDetails = [
@@ -300,7 +300,7 @@ public function update_profile(Request $request)
     $avatar = Avatars::find($user->avatar_id);
    $gender = $avatar ? $avatar->gender : '';
 
-   $imageUrl = $avatar->image ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+   $imageUrl = ($avatar && $avatar->image) ? asset('storage/app/public/avatars/' . $avatar->image) : '';
    $voicePath = $user && $user->voice ? asset('storage/app/public/voices/' . $user->voice) : '';
 
     return response()->json([
@@ -348,7 +348,7 @@ public function userdetails(Request $request)
    $avatar = Avatars::find($user->avatar_id);
    $gender = $avatar ? $avatar->gender : '';
 
-   $imageUrl = $avatar->image ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+   $imageUrl = ($avatar && $avatar->image) ? asset('storage/app/public/avatars/' . $avatar->image) : '';
    $voicePath = $user && $user->voice ? asset('storage/app/public/voices/' . $user->voice) : '';
     return response()->json([
         'success' => true,
@@ -496,7 +496,7 @@ public function avatar_list(Request $request)
 
     $avatarData = [];
     foreach ($avatars as $avatar) {
-        $imageUrl = $avatar->image ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+        $imageUrl = ($avatar && $avatar->image) ? asset('storage/app/public/avatars/' . $avatar->image) : '';
         $avatarData[] = [
             'id' => $avatar->id,
             'gender' => $avatar->gender,
@@ -807,7 +807,7 @@ public function update_voice(Request $request)
 
     return response()->json([
         'success' => true,
-        'message' => 'User details updated successfully.',
+        'message' => 'User Voice  updated successfully.',
         'data' => [
             'id' => $user->id,
             'name' => $user->name,
