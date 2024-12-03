@@ -16,7 +16,37 @@ class UserVerificationController extends Controller
      * @return \Illuminate\Http\Response
      * 
      */
+    public function verify(Request $request)
+    {
+        $verificationIds = $request->input('verification_ids', []);
 
+        foreach ($verificationIds as $verificationId) {
+            $voice_verifications = UserVerifications::find($verificationId);
+            if ($voice_verifications) {
+                // Update the withdrawal status to Paid (1)
+                $voice_verifications->status = 3;
+                $voice_verifications->save();
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function reject(Request $request)
+    {
+        $verificationIds = $request->input('verification_ids', []);
+
+        foreach ($verificationIds as $verificationId) {
+            $voice_verifications = UserVerifications::find($verificationId);
+            if ($voice_verifications) {
+                // Update the withdrawal status to Paid (1)
+                $voice_verifications->status = 2;
+                $voice_verifications->save();
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
  
 
      public function index(Request $request)
