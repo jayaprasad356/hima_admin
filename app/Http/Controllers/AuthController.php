@@ -9,7 +9,8 @@ use App\Models\avatars;
 use App\Models\coins;
 use App\Models\speech_texts;   
 use App\Models\Transaction;
-use App\Models\DeletedUsers;  
+use App\Models\DeletedUsers; 
+use App\Models\Withdrawals;  
 use Carbon\Carbon;
 use App\Models\News; 
 use Illuminate\Support\Facades\Http;
@@ -824,23 +825,36 @@ public function update_voice(Request $request)
 
 public function speech_text(Request $request)
 {
-    // Retrieve all news settings
-    $speech_text = Speech_texts::all();
+    // Get the 'language' parameter from the request
+    $language = $request->input('language');
 
-    if ($speech_text->isEmpty()) {
+    // Check if 'language' is empty
+    if (empty($language)) {
         return response()->json([
             'success' => false,
-            'message' => 'No Speech Text found.',
+            'message' => 'Language is empty.',
         ], 200);
     }
 
-    $speech_textData = [];
-    foreach ($speech_text as $item) {
-        $speech_textData[] = [
-            'id' => $item->id,
-            'text' => $item->text,
-        ];
-    }
+    // Fetch one random speech text related to the specified language
+    $speech_text = Speech_texts::where('language', $language)->inRandomOrder()->first();
+
+    // Check if any record was found
+    if (!$speech_text) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No Speech Text found for the specified language.',
+        ], 200);
+    } 
+
+    // Prepare the response data
+    $speech_textData = [
+        [
+            'id' => $speech_text->id,
+            'text' => $speech_text->text,
+            'language' => $speech_text->language,
+        ]
+    ];
 
     return response()->json([
         'success' => true,
@@ -848,5 +862,118 @@ public function speech_text(Request $request)
         'data' => $speech_textData,
     ], 200);
 }
+
+public function female_users_list(Request $request)
+{
+    // Retrieve offset and limit from the request, with default values
+    $offset = $request->input('offset', 0);
+    $limit = $request->input('limit', 10); // Default limit to 10 if not provided
+
+    // Count total female users
+    $totalCount = Users::where('gender', 'female')->count();
+
+    // Retrieve paginated female users
+    $Users = Users::where('gender', 'female')
+        ->skip($offset)
+        ->take($limit)
+        ->with('avatar') // Only eager load the avatar relationship if necessary
+        ->get();
+
+    if ($Users->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No female users found.',
+            'total' => $totalCount, // Include total count even if no data found
+        ], 200);
+    }
+
+    $UsersData = [];
+    foreach ($Users as $User) {
+        $avatar = $User->avatar; // Use the avatar relationship to get the avatar
+        $gender = $avatar ? $avatar->gender : '';
+        $imageUrl = $avatar && $avatar->image ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+        $voicePath = $User->voice ? asset('storage/app/public/voices/' . $User->voice) : '';
+
+        $UsersData[] = [
+            'id' => $User->id,
+            'name' => $User->name,
+            'user_gender' => $User->gender,
+            'avatar_id' => $User->avatar_id,
+            'image' => $imageUrl,
+            'gender' => $gender,
+            'language' => $User->language,
+            'age' => $User->age ?? '',
+            'mobile' => $User->mobile ?? '',
+            'interests' => $User->interests ?? '',
+            'describe_yourself' => $User->describe_yourself ?? '',
+            'voice' => $voicePath ?? '',
+            'datetime' => Carbon::parse($User->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($User->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($User->created_at)->format('Y-m-d H:i:s'),
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Female users listed successfully.',
+        'total' => $totalCount, // Include total count in the response
+        'data' => $UsersData,
+    ], 200);
+}
+
+public function withdrawals_list(Request $request)
+{
+    // Retrieve user_id, offset, and limit from request
+    $user_id = $request->input('user_id');
+    $offset = $request->input('offset', 0);  // Default offset to 0 if not provided
+    $limit = $request->input('limit', 10);  // Default limit to 10 if not provided
+
+        // Check if user_id is provided
+        if (empty($user_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'user_id is empty.',
+            ], 200);
+        }
+    
+    // Retrieve the total count of withdrawals for the given user_id
+    $totalCount = Withdrawals::where('user_id', $user_id)->count();
+
+    // Retrieve paginated withdrawals for the given user_id
+    $withdrawals = Withdrawals::where('user_id', $user_id)
+                 ->orderBy('datetime', 'desc')
+                 ->skip($offset)  // Apply offset for pagination
+                 ->take($limit)   // Apply limit for pagination
+                 ->get();
+
+    // Check if any withdrawals exist for this user
+    if ($withdrawals->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No withdrawals found for this user.',
+            'total' => $totalCount, // Include total count even if no data found
+        ], 200);
+    }
+
+    // Prepare the withdrawal data
+    $withdrawalsData = [];
+    foreach ($withdrawals as $withdrawal) {
+        $withdrawalsData[] = [
+            'id' => $withdrawal->id,
+            'user_id' => $withdrawal->user_id,
+            'amount' => $withdrawal->amount,
+            'status' => $withdrawal->status,
+            'datetime' => $withdrawal->datetime, // Assuming this field exists
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Withdrawals listed successfully.',
+        'total' => $totalCount, // Include total count in the response
+        'data' => $withdrawalsData,
+    ], 200);
+}
+
 
 }

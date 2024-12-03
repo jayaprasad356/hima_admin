@@ -50,6 +50,13 @@
                 </li>
 
                 <li class="nav-item has-treeview">
+                <a href="{{ route('user_verifications.index') }}" class="nav-link {{ activeSegment('user_verifications') }}">
+                <i class="nav-icon fas fa-check-circle"></i>
+                        <p>User Verifications</p>
+                    </a>
+                </li>
+
+                <li class="nav-item has-treeview">
                     <a href="{{ route('news.edit') }}" class="nav-link {{ activeSegment('news') }}">
                         <i class="nav-icon fas fa-gear"></i>
                         <p>Settings</p>

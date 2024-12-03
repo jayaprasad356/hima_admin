@@ -40,6 +40,7 @@
                     <th>profile<i class="fas fa-sort"></i></th>
                     <th>Coins <i class="fas fa-sort"></i></th>
                     <th>Total Coins <i class="fas fa-sort"></i></th>
+                    <th>Status <i class="fas fa-sort"></i></th>
                     <th>DateTime <i class="fas fa-sort"></i></th>
                     </tr>
                 </thead>
@@ -67,6 +68,11 @@
                         </td>
                         <td>{{$user->coins}}</td>
                         <td>{{$user->total_coins}}</td>
+                        <td>
+                        <span class=" @if($user->status == 1) text-pending @elseif($user->status == 3) text-success @elseif($user->status == 2) text-danger @else text-secondary @endif">
+                                @if($user->status == 1) Pending @elseif($user->status == 3) Verified @elseif($user->status == 2) Rejected @else Unknown @endif
+                            </span>
+                            </td>
                         <td>{{$user->datetime}}</td>
                     </tr>
                     @endforeach

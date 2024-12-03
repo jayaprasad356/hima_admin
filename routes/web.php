@@ -199,7 +199,10 @@ Route::prefix('admin')->middleware('auth')->group(function () {
                     
                Route::get('/speech_texts', [SpeechTextController::class, 'index'])->name('speech_texts.index');
                Route::delete('/speech_texts/{speech_texts}', [SpeechTextController::class, 'destroy'])->name('speech_texts.destroy');
-                    
+               Route::get('/speech_texts/create', [SpeechTextController::class, 'create'])->name('speech_texts.create');
+               Route::get('/speech_texts/{speech_texts}/edit', [SpeechTextController::class, 'edit'])->name('speech_texts.edit');
+               Route::put('/speech_texts/{speech_texts}', [SpeechTextController::class, 'update'])->name('speech_texts.update');
+               Route::post('/speech_texts', [SpeechTextController::class, 'store'])->name('speech_texts.store');
 
                          //Recharge Trans  
                Route::get('/recharge_trans', [Recharge_transController::class, 'index'])->name('recharge_trans.index');

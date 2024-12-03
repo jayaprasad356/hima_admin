@@ -3,6 +3,7 @@
 @section('title', 'Speech Text Management')
 @section('content-header', 'Speech Text Management')
 @section('content-actions')
+    <a href="{{ route('speech_texts.create') }}" class="btn btn-success"><i class="fas fa-plus"></i> Add New Speech Text</a>
 @endsection
 @section('css')
     <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css') }}">
@@ -29,16 +30,19 @@
                         <th>Actions</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>Text<i class="fas fa-sort"></i></th>
+                        <th>Language<i class="fas fa-sort"></i></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($speech_texts as $speech_text)
                     <tr>
                         <td>
+                        <a href="{{ route('speech_texts.edit', $speech_text) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
                             <button class="btn btn-danger btn-delete" data-url="{{route('speech_texts.destroy', $speech_text)}}"><i class="fas fa-trash"></i></button>
                         </td>
                         <td>{{$speech_text->id}}</td>  
                         <td>{{$speech_text->text}}</td>
+                        <td>{{$speech_text->language}}</td>
                     </tr>
                     @endforeach
                 </tbody>

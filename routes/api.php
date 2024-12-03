@@ -19,6 +19,8 @@ Route::post('delete_users', [AuthController::class, 'delete_users']);
 Route::post('user_validations', [AuthController::class, 'user_validations']);
 Route::post('speech_text', [AuthController::class, 'speech_text']);
 Route::post('update_voice', [AuthController::class, 'update_voice']);
+Route::post('female_users_list', [AuthController::class, 'female_users_list']);
+Route::post('withdrawals_list', [AuthController::class, 'withdrawals_list']);
 
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
