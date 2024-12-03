@@ -213,7 +213,7 @@ public function register(Request $request)
         'interests' => $user->interests,
         'describe_yourself' =>  $user->describe_yourself ?? '',
         'voice' =>  $voicePath ?? '',
-        'status' => 1,
+        'status' => 0,
         'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
         'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
         'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
