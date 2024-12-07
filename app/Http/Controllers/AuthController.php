@@ -314,7 +314,7 @@ public function update_profile(Request $request)
             'user_gender' => $user->gender,
             'language' => $user->language,
             'mobile' => $user->mobile,
-            'avatar_id' => $user->avatar_id,
+            'avatar_id' => (int) $user->avatar_id,
             'image' => $imageUrl ?? '',
             'gender' => $gender,
              'age' => $user-> age ?? '',
