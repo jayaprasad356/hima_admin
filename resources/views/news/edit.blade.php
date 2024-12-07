@@ -29,6 +29,11 @@
                 <input type="text" class="form-control" id="demo_video" name="demo_video" value="{{ $news->demo_video }}" required>
             </div>
 
+            <div class="form-group">
+                <label for="minimum_withdrawals">Minimum Withdrawals</label>
+                <input type="text" class="form-control" id="minimum_withdrawals" name="minimum_withdrawals" value="{{ $news->minimum_withdrawals }}" required>
+            </div>
+
             <div class="box-footer">
                 <button type="submit" class="btn btn-primary">Update</button>
             </div>

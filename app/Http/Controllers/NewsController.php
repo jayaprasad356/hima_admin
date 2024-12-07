@@ -20,12 +20,14 @@ class NewsController extends Controller
             'privacy_policy' => 'required|string',
             'support_mail' => 'required|string',
             'demo_video' => 'required|string',
+            'minimum_withdrawals' => 'required|string',
         ]);
 
         $news = News::findOrFail(1); // Again, assuming ID 1 for simplicity
         $news->privacy_policy = $request->input('privacy_policy');
         $news->support_mail = $request->input('support_mail');
         $news->demo_video = $request->input('demo_video');
+        $news->minimum_withdrawals = $request->input('minimum_withdrawals');
     
 
         if ($news->save()) {

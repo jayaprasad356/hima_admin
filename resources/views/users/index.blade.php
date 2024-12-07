@@ -38,6 +38,7 @@
                     <th>Language <i class="fas fa-sort"></i></th>
                     <th>Gender<i class="fas fa-sort"></i></th>
                     <th>profile<i class="fas fa-sort"></i></th>
+                    <th>Balance <i class="fas fa-sort"></i></th>
                     <th>Coins <i class="fas fa-sort"></i></th>
                     <th>Total Coins <i class="fas fa-sort"></i></th>
                     <th>Status <i class="fas fa-sort"></i></th>
@@ -66,6 +67,7 @@
                                 <span>No Avatar</span> <!-- Fallback if no image is found -->
                             @endif
                         </td>
+                        <td>{{$user->balance}}</td>
                         <td>{{$user->coins}}</td>
                         <td>{{$user->total_coins}}</td>
                         <td>
