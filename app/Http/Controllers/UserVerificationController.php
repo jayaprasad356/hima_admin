@@ -24,7 +24,7 @@ class UserVerificationController extends Controller
             $voice_verifications = UserVerifications::find($verificationId);
             if ($voice_verifications) {
                 // Update the withdrawal status to Paid (1)
-                $voice_verifications->status = 3;
+                $voice_verifications->status = 2;
                 $voice_verifications->save();
             }
         }
@@ -40,7 +40,7 @@ class UserVerificationController extends Controller
             $voice_verifications = UserVerifications::find($verificationId);
             if ($voice_verifications) {
                 // Update the withdrawal status to Paid (1)
-                $voice_verifications->status = 2;
+                $voice_verifications->status = 3;
                 $voice_verifications->save();
             }
         }
