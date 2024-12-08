@@ -46,7 +46,7 @@
                             <label for="status-filter" class="mr-2">Filter by Status:</label>
                             <select name="status" id="status-filter" class="form-control">
                                 <option value="1" {{ request()->input('status') === '1' ? 'selected' : '' }}>Pending</option>
-                                <option value="2" {{ request()->input('status') === '2' ? 'selected' : '' }}>Verified</option>
+                                <option value="2" {{ request()->input('status') === '2' ? 'selected' : '' }}>Approved</option>
                                 <option value="3" {{ request()->input('status') === '3' ? 'selected' : '' }}>Rejected</option>
                             </select>
                         </div>
@@ -76,7 +76,7 @@
                         <td><a href="{{ asset('storage/app/public/voices/' . $user->voice) }}" target="_blank">Play Voice</a></td>
                         <td>
                             <span class=" @if($user->status == 1) text-pending @elseif($user->status == 2) text-success @elseif($user->status == 3) text-danger @else text-secondary @endif">
-                                @if($user->status == 1) Pending @elseif($user->status == 2) Verified @elseif($user->status == 3) Rejected @else Unknown @endif
+                                @if($user->status == 1) Pending @elseif($user->status == 2) Approved @elseif($user->status == 3) Rejected @else Unknown @endif
                             </span>
                         </td>
                     </tr>
