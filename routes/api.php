@@ -21,7 +21,10 @@ Route::post('speech_text', [AuthController::class, 'speech_text']);
 Route::post('update_voice', [AuthController::class, 'update_voice']);
 Route::post('female_users_list', [AuthController::class, 'female_users_list']);
 Route::post('withdrawals_list', [AuthController::class, 'withdrawals_list']);
-
+Route::post('calls_status_update', [AuthController::class, 'calls_status_update']);
+Route::post('random_user', [AuthController::class, 'random_user']);
+Route::post('update_connected_call', [AuthController::class, 'update_connected_call']);
+Route::post('calls_list', [AuthController::class, 'calls_list']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

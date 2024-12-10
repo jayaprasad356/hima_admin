@@ -11,6 +11,7 @@ use App\Models\speech_texts;
 use App\Models\Transaction;
 use App\Models\DeletedUsers; 
 use App\Models\Withdrawals;  
+use App\Models\UserCalls;
 use Carbon\Carbon;
 use App\Models\News; 
 use Illuminate\Support\Facades\Http;
@@ -81,6 +82,8 @@ class AuthController extends Controller
             'voice' => $voicePath ?? '',
             'status' => $user->status ?? '',
             'balance' =>(int) $user->balance ?? '',
+            'audio_status' =>(int) $user->audio_status ?? '',
+            'video_status' =>(int) $user->video_status ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -180,8 +183,11 @@ public function register(Request $request)
         }
     }
 
-    // Generate a random name if not provided
-    if (empty($name)) {
+    // Generate a random name for female users if not provided
+    if (strtolower($gender) === 'female' && empty($name)) {
+        $name = $this->generateRandomFemaleName(); 
+    } elseif (empty($name)) {
+        // Fallback for male users or unspecified gender
         $name = $this->generateRandomName(); 
     }
 
@@ -228,12 +234,27 @@ public function register(Request $request)
         'data' => $userDetails,
     ], 200);
 }
+
+private function generateRandomFemaleName()
+{
+    // Fetch a random name from female_users table
+    $randomFemaleName = DB::table('female_users')->inRandomOrder()->value('name');
+    if (!$randomFemaleName) {
+        $randomFemaleName = 'User'; // Default name if table is empty
+    }
+
+    // Append random 3 digits
+    $randomDigits = substr(str_shuffle('0123456789'), 0, 3);
+    return $randomFemaleName . $randomDigits;
+}
+
 private function generateRandomName()
 {
     $letters = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 5);
     $numbers = substr(str_shuffle('0123456789'), 0, 3);
     return $letters . $numbers;
 }
+
 
 public function update_profile(Request $request)
 {
@@ -324,6 +345,8 @@ public function update_profile(Request $request)
              'voice' => $voicePath ?? '',
              'status' => $user->status ?? '',
              'balance' => (int) $user->balance ?? '',
+             'audio_status' =>(int) $user->audio_status ?? '',
+             'video_status' =>(int) $user->video_status ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -372,6 +395,8 @@ public function userdetails(Request $request)
             'voice' => $voicePath ?? '',
             'status' => $user->status ?? '',
             'balance' =>(int) $user->balance ?? '',
+            'audio_status' =>(int) $user->audio_status ?? '',
+            'video_status' =>(int) $user->video_status ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -754,6 +779,8 @@ public function user_validations(Request $request)
             'voice' => $voicePath ?? '',
             'status' => $user->status ?? '',
             'balance' =>(int) $user->balance ?? '',
+            'audio_status' =>(int) $user->audio_status ?? '',
+            'video_status' =>(int) $user->video_status ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -830,6 +857,8 @@ public function update_voice(Request $request)
             'voice' => $voicePath, 
             'status' => $user->status ?? '',
             'balance' =>(int) $user->balance ?? '',
+            'audio_status' =>(int) $user->audio_status ?? '',
+            'video_status' =>(int) $user->video_status ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -924,6 +953,8 @@ public function female_users_list(Request $request)
             'voice' => $voicePath ?? '',
             'status' => $User->status ?? '',
             'balance' =>(int) $User->balance ?? '',
+            'audio_status' =>(int) $User->audio_status ?? '',
+            'video_status' =>(int) $User->video_status ?? '',
             'datetime' => Carbon::parse($User->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($User->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($User->created_at)->format('Y-m-d H:i:s'),
@@ -992,5 +1023,451 @@ public function withdrawals_list(Request $request)
     ], 200);
 }
 
+
+public function calls_status_update(Request $request)
+{
+    // Retrieve input values
+    $user_id = $request->input('user_id');
+    $call_type = $request->input('call_type'); // Should be 'audio' or 'video'
+    $status = $request->input('status');       // Should be 1 or 0
+
+    // Validate user_id
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    // Find the user
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 200);
+    }
+
+    if (empty($call_type)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'call_type is empty.',
+        ], 200);
+    }
+
+    // Validate call_type
+    if (!in_array($call_type, ['audio', 'video'])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid call_type. It must be either "audio" or "video".',
+        ], 200);
+    }
+
+    if (empty($status)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'status is empty.',
+        ], 200);
+    }
+
+    // Validate status
+    if (!in_array($status, [0, 1])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid status. It must be 0 or 1.',
+        ], 200);
+    }
+
+    if ($call_type === 'audio') {
+        $user->audio_status = $status;
+    } elseif ($call_type === 'video') {
+        $user->video_status = $status;
+    }
+
+    $user->datetime = now(); 
+    $user->save(); 
+
+    // Fetch additional details for response
+    $avatar = Avatars::find($user->avatar_id);
+    $gender = $avatar ? $avatar->gender : '';
+
+    $imageUrl = $avatar && $avatar->image 
+        ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+    $voicePath = $user && $user->voice 
+        ? asset('storage/app/public/voices/' . $user->voice) : '';
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Call status updated successfully.',
+        'data' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'user_gender' => $user->gender,
+            'avatar_id' => (int) $user->avatar_id,
+            'image' => $imageUrl ?? '',
+            'gender' => $gender,
+            'language' => $user->language,
+            'age' => (int) $user->age ?? '',
+            'mobile' => $user->mobile ?? '',
+            'interests' => $user->interests ?? '',
+            'describe_yourself' => $user->describe_yourself ?? '',
+            'voice' => $voicePath,
+            'status' => $user->status ?? '',
+            'balance' => (int) $user->balance ?? '',
+            'audio_status' =>(int) $user->audio_status ?? '',
+            'video_status' =>(int) $user->video_status ?? '',
+            'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
+        ],
+    ], 200);
+}
+
+
+public function random_user(Request $request)
+{
+    // Retrieve input values
+    $user_id = $request->input('user_id');
+    $call_type = $request->input('call_type'); // Should be 'audio' or 'video'
+
+    // Validate user_id
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    // Find the user
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 200);
+    }
+
+    if (empty($call_type)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'call_type is empty.',
+        ], 200);
+    }
+
+    // Validate call_type
+    if (!in_array($call_type, ['audio', 'video'])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid call_type. It must be either "audio" or "video".',
+        ], 200);
+    }
+
+    if ($user->coins < 10) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Insufficient coins.',
+        ], 200);
+    }
+
+    $balance_time = '';
+    $coins = $user->coins;
+    
+    // Calculate balance time in minutes and seconds
+    $minutes = floor($coins / 10); // For every 10 coins, 1 minute
+    $seconds = 0; // Assume no partial seconds for simplicity
+    $balance_time = sprintf('%d:%02d', $minutes, $seconds);
+
+
+    // Filter female users with status = 1 based on call_type
+    $query = Users::where('gender', 'female')
+        ->where('id', '!=', $user_id); // Exclude the requesting user
+
+    if ($call_type == 'video') {
+        $query->where('video_status', 1);
+    } else { // 'audio'
+        $query->where('audio_status', 1);
+    }
+
+    // Fetch random user
+    $randomFemaleUser = $query->inRandomOrder()->first();
+
+    // If no users are found, return a busy message
+    if (!$randomFemaleUser) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Users are busy right now.',
+        ], 200);
+    }
+
+
+    // Insert call data into users_call table
+    $usersCalls = UserCalls::create([
+        'user_id' => $user->id,
+        'call_user_id' => $randomFemaleUser->id,
+        'type' => $call_type,
+        'datetime' => now(),
+    ]);
+
+    // Fetch inserted call data
+    $insertedCallData = UserCalls::find($usersCalls->id);
+
+    // Fetch names of the users from the users table
+    $caller = Users::find($insertedCallData->user_id);
+    $receiver = Users::find($insertedCallData->call_user_id);
+
+    // Return response with success and inserted call data
+    return response()->json([
+        'success' => true,
+        'message' => 'Data created successfully.',
+        'data' => [
+            'call_id' => $insertedCallData->id,
+            'user_id' => $insertedCallData->user_id,
+            'user_name' => $caller ? $caller->name : '',
+            'call_user_id' => $insertedCallData->call_user_id,
+            'call_user_name' => $receiver ? $receiver->name : '',
+            'type' => $insertedCallData->type,
+            'started_time' => $insertedCallData->started_time ?? '',
+            'ended_time' => $insertedCallData->ended_time ?? '',
+            'coins_spend' => $insertedCallData->coins_spend ?? '',
+            'income' => $insertedCallData->income?? '',
+            'balance_time' => $balance_time,
+            'date_time' => Carbon::parse($insertedCallData->date_time)->format('Y-m-d H:i:s'),
+        ],
+    ], 200);
+}
+
+
+public function update_connected_call(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $call_id = $request->input('call_id'); 
+    $started_time = $request->input('started_time'); 
+    $ended_time = $request->input('ended_time'); 
+
+    // Validate user_id
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    if (empty($call_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'call_id is empty.',
+        ], 200);
+    }
+
+    if (empty($started_time)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'started_time is empty.',
+        ], 200);
+    }
+
+    if (empty($ended_time)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'ended_time is empty.',
+        ], 200);
+    }
+        $timeFormat = 'H:i:s';
+    
+        if (!Carbon::hasFormat($started_time, $timeFormat)) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'started_time must be in H:i:s format (e.g., 14:00:00).'
+            ], 200);
+        }
+    
+        if (!Carbon::hasFormat($ended_time, $timeFormat)) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'ended_time must be in H:i:s format (e.g., 14:00:00).'
+            ], 200);
+          }
+
+    $call = UserCalls::where('id', $call_id)
+                     ->first();
+
+    if (!$call) {
+        return response()->json([ 
+            'success' => false,
+            'message' => 'Call not found.',
+        ], 200);
+    }
+    $user = Users::find($user_id);
+
+  // Convert the times to Carbon instances with today's date
+  $currentDate = Carbon::now()->format('Y-m-d'); // Current date
+  $startTime = Carbon::createFromFormat('Y-m-d H:i:s', "$currentDate $started_time"); // Add the date
+  $endTime = Carbon::createFromFormat('Y-m-d H:i:s', "$currentDate $ended_time"); // Add the date
+
+  // Calculate duration in minutes (ensure at least 1 minute)
+  $durationMinutes = max($endTime->diffInMinutes($startTime), 1);
+
+    // Calculate spend coins and income
+    $coinsPerMinute = 10;
+    $incomePerMinute = 2;
+
+    $coins_spend = $durationMinutes * $coinsPerMinute;
+    $income = $durationMinutes * $incomePerMinute;
+
+
+    $user->coins -= $coins_spend;
+    $user->save();
+
+    $call->started_time = $startTime->format('H:i:s');
+    $call->ended_time = $endTime->format('H:i:s'); 
+    $call->coins_spend = $coins_spend;
+    $call->income = $income;
+    $call->save();
+
+    $receiver = Users::find($call->call_user_id);
+  
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Connected call updated successfully.',
+        'data' => [
+            'call_id' => $call->id,
+            'user_id' => $call->user_id,
+            'user_name' => $user->name,
+            'call_user_id' => $call->call_user_id,
+            'call_user_name' => $receiver ? $receiver->name : '',
+            'coins_spend' =>$call-> coins_spend,
+            'income' =>$call-> income,
+            'started_time' => $call->started_time,
+            'ended_time' => $call->ended_time,
+            'date_time' => Carbon::parse($call->datetime)->format('Y-m-d H:i:s'),
+        ],
+    ], 200);
+}
+
+
+
+public function calls_list(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $gender = $request->input('gender'); 
+
+    // Validate user_id
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    // Find the user
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 200);
+    }
+
+    if (empty($gender)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'gender is empty.',
+        ], 200);
+    }
+
+    // Validate gender
+    if (!in_array($gender, ['male', 'female'])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid gender. It must be either "male" or "female".',
+        ], 200);
+    }
+
+    // Query based on gender
+    if ($gender === 'male') {
+        // Male: Check where user_id matches
+        $calls = UserCalls::where('user_id', $user_id)->get();
+    } else {
+        // Female: Check where call_user_id matches
+        $calls = UserCalls::where('call_user_id', $user_id)->get();
+    }
+
+    // Check if no calls found
+    if ($calls->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Data not found.',
+        ], 200);
+    }
+
+    // Prepare the call data
+    $callData = [];
+    foreach ($calls as $call) {
+        // Calculate duration if gender is male
+        $duration = '';
+        if ($call->started_time && $call->ended_time) {
+            $startTime = Carbon::parse($call->started_time);
+            $endTime = Carbon::parse($call->ended_time);
+
+            // Calculate difference in seconds
+            $durationSeconds = $startTime->diffInSeconds($endTime);
+            
+            // Convert total seconds to minutes and seconds
+            $durationMinutes = floor($durationSeconds / 60); // Minutes
+            $durationSeconds = $durationSeconds % 60; // Remaining seconds
+
+            // Format duration as i:s (e.g., 5:45)
+            $duration = sprintf('%d:%02d', $durationMinutes, $durationSeconds);
+        }
+
+        // For female gender, we return income
+        $income = $gender === 'female' ? $call->income : '';
+
+        // Fetch user names for both user_id and call_user_id
+        $caller = Users::find($call->user_id);
+        $receiver = Users::find($call->call_user_id);
+
+        $avatar = null;
+        $imageUrl = '';
+        if ($gender === 'male' && $receiver) {
+            $avatar = Avatars::find($receiver->avatar_id);
+            $imageUrl = ($avatar && $avatar->image) ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+        } elseif ($gender === 'female' && $receiver) {
+            $avatar = Avatars::find($receiver->avatar_id);
+            $imageUrl = ($avatar && $avatar->image) ? asset('storage/app/public/avatars/' . $avatar->image) : '';
+        }
+        // Add data to response array based on gender
+        if ($gender === 'male') {
+            // For male users, include audio and video status
+            $callData[] = [
+                'id' =>$call->call_user_id,
+                'name' => $receiver ? $receiver->name : '',
+                'image' => $imageUrl,
+                'started_time' => $call->started_time ?? '',
+                'duration' => $duration,
+                'audio_status' => $receiver->audio_status,
+                'video_status' => $receiver->video_status,
+            ];
+        } elseif ($gender === 'female') {
+            // For female users, include income
+            $callData[] = [
+                'id' =>$call->call_user_id,
+                'name' => $receiver ? $receiver->name : '',
+                'image' => $imageUrl,
+                'started_time' => $call->started_time ?? '',
+                'duration' => $duration,
+                'income' => $income, 
+            ];
+        }
+    }
+
+    // Return the call data response
+    return response()->json([
+        'success' => true,
+        'message' => 'Calls listed successfully.',
+        'data' => $callData,
+    ], 200);
+}
 
 }
