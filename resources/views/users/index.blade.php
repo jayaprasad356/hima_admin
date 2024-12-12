@@ -57,7 +57,7 @@
                         <td>{{$user->name}}</td>
                         <td>{{$user->mobile}}</td>
                         <td>{{$user->language}}</td>
-                        <td>{{ optional($user->avatars)->gender }}</td>
+                        <td>{{$user->gender}}</td>
                         <td>
                             @if ($user->avatars && $user->avatars->image) <!-- Check if avatar and image exist -->
                                 <a href="{{ asset('storage/app/public/avatars/' . $user->avatars->image) }}" data-lightbox="image-{{ $user->id }}">

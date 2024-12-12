@@ -69,6 +69,35 @@
                         @enderror
                     </div>
 
+                    <div class="form-group">
+                        <label for="audio_status">Audio Status</label>
+                        <div class="custom-control custom-switch">
+                            <input type="hidden" name="audio_status" value="0"> <!-- Hidden input to ensure a value is always submitted -->
+                            <input type="checkbox" name="audio_status" class="custom-control-input @error('audio_status') is-invalid @enderror" id="audio_status" value="1" {{ old('audio_status', $users->audio_status) == '1' ? 'checked' : '' }}>
+                            <label class="custom-control-label" for="audio_status"></label>
+                        </div>
+                        @error('audio_status')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                        @enderror
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="video_status">Video Status</label>
+                        <div class="custom-control custom-switch">
+                            <input type="hidden" name="video_status" value="0"> <!-- Hidden input to ensure a value is always submitted -->
+                            <input type="checkbox" name="video_status" class="custom-control-input @error('video_status') is-invalid @enderror" id="video_status" value="1" {{ old('video_status', $users->video_status) == '1' ? 'checked' : '' }}>
+                            <label class="custom-control-label" for="video_status"></label>
+                        </div>
+                        @error('video_status')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                        @enderror
+                    </div>
+
 
 
                 <button class="btn btn-success btn-block btn-lg" type="submit">Save Changes</button>

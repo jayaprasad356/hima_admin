@@ -73,6 +73,8 @@ class UsersController extends Controller
         $users->interests = $request->interests;
         $users->describe_yourself = $request->describe_yourself;
         $users->voice = $request->voice; 
+        $users->audio_status = $request->audio_status;
+        $users->video_status = $request->video_status; 
         $users->datetime = now();
    
     
