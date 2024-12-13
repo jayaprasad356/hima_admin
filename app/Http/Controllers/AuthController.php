@@ -1063,21 +1063,14 @@ public function calls_status_update(Request $request)
         ], 200);
     }
 
-    if (empty($status)) {
+    if (!isset($status) || !in_array($status, [0, 1])) {
         return response()->json([
             'success' => false,
-            'message' => 'status is empty.',
+            'message' => 'Invalid status. It must be either 0 or 1.',
         ], 200);
     }
 
-    // Validate status
-    if (!in_array($status, [0, 1])) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid status. It must be 0 or 1.',
-        ], 200);
-    }
-
+   
     if ($call_type === 'audio') {
         $user->audio_status = $status;
     } elseif ($call_type === 'video') {
