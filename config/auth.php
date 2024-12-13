@@ -45,6 +45,10 @@ return [
             'driver' => 'session',
             'provider' => 'shops',
         ],
+        'api' => [
+            'driver' => 'jwt',
+            'provider' => 'users',
+        ],
     ],
 
     /*
@@ -68,6 +72,10 @@ return [
         'admins' => [
             'driver' => 'eloquent',
             'model' => App\Models\Admin::class,
+        ],
+        'users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Users::class,
         ],
     
     ],

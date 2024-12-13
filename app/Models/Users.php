@@ -4,10 +4,14 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Laravel\Sanctum\HasApiTokens;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-class Users extends Authenticatable
+
+class Users extends Authenticatable implements JWTSubject
 {
-    use Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $guard = 'users';
     protected $table = 'users';
@@ -35,9 +39,9 @@ class Users extends Authenticatable
 
     public $timestamps = true;
 
-    protected $hidden = [
-        'password', 'remember_token',
-    ];
+    // protected $hidden = [
+    //     'password', 'remember_token',
+    // ];
 
     public function findForPassport($mobile)
     {
@@ -53,4 +57,17 @@ class Users extends Authenticatable
     {
         return 'https://www.gravatar.com/avatar/' . md5($this->email);
     }
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+ 
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+    // public function authenticate($payload)
+    // {
+    //     return $this->where('mobile', $payload['mobile'])->first();
+    // }
 }

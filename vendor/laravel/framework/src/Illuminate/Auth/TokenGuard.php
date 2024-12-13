@@ -107,7 +107,7 @@ class TokenGuard implements Guard
         }
 
         if (empty($token)) {
-            $token = $this->request->getPassword();
+            // $token = $this->request->getPassword();
         }
 
         return $token;
