@@ -13,7 +13,8 @@ class Coins extends Model
         'id',
         'coins',
         'price',
-        'discount_price',
+        'save',
+        'popular',
     ];
 
 }

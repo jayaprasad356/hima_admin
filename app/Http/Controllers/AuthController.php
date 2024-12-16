@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Users;
 use App\Models\avatars;
-use App\Models\coins;
+use App\Models\Coins;
 use App\Models\speech_texts;   
 use App\Models\Transaction;
 use App\Models\DeletedUsers; 
@@ -439,8 +439,9 @@ public function coins_list(Request $request)
         return [
             'id' => $coins->id,
             'price' => $coins->price,
-            'discount_price' => $coins->discount_price,
             'coins' => $coins->coins,
+            'save' => $coins->save,
+            'popular' => $coins->popular,
             'updated_at' => Carbon::parse($coins->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($coins->created_at)->format('Y-m-d H:i:s'),
         ];
@@ -942,7 +943,7 @@ public function female_users_list(Request $request)
             'id' => $User->id,
             'name' => $User->name,
             'user_gender' => $User->gender,
-              'avatar_id' => (int) $User->avatar_id,
+            'avatar_id' => (int) $User->avatar_id,
             'image' => $imageUrl ?? '',
             'gender' => $gender,
             'language' => $User->language,
