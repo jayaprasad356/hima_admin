@@ -1170,7 +1170,6 @@ public function random_user(Request $request)
     $seconds = 0; // Assume no partial seconds for simplicity
     $balance_time = sprintf('%d:%02d', $minutes, $seconds);
 
-
     // Filter female users with status = 1 based on call_type
     $query = Users::where('gender', 'female')
         ->where('id', '!=', $user_id); // Exclude the requesting user
@@ -1192,6 +1191,7 @@ public function random_user(Request $request)
         ], 200);
     }
 
+  
 
     // Insert call data into users_call table
     $usersCalls = UserCalls::create([
@@ -1208,6 +1208,16 @@ public function random_user(Request $request)
     $caller = Users::find($insertedCallData->user_id);
     $receiver = Users::find($insertedCallData->call_user_id);
 
+
+    // Fetch avatar image for receiver
+    $receiverAvatar = Avatars::find($receiver->avatar_id);
+    $receiverImageUrl = ($receiverAvatar && $receiverAvatar->image) ? asset('storage/app/public/avatars/' . $receiverAvatar->image) : '';
+
+       // Fetch avatar image for caller if needed
+       $callerAvatar = Avatars::find($caller->avatar_id);
+       $callerImageUrl = ($callerAvatar && $callerAvatar->image) ? asset('storage/app/public/avatars/' . $callerAvatar->image) : '';
+   
+   
     // Return response with success and inserted call data
     return response()->json([
         'success' => true,
@@ -1216,8 +1226,10 @@ public function random_user(Request $request)
             'call_id' => $insertedCallData->id,
             'user_id' => $insertedCallData->user_id,
             'user_name' => $caller ? $caller->name : '',
+            'user_avatar_image' => $callerImageUrl,
             'call_user_id' => $insertedCallData->call_user_id,
             'call_user_name' => $receiver ? $receiver->name : '',
+            'call_user_avatar_image' => $receiverImageUrl,
             'type' => $insertedCallData->type,
             'started_time' => $insertedCallData->started_time ?? '',
             'ended_time' => $insertedCallData->ended_time ?? '',
@@ -1265,24 +1277,24 @@ public function update_connected_call(Request $request)
             'message' => 'ended_time is empty.',
         ], 200);
     }
-        $timeFormat = 'H:i:s';
-    
-        if (!Carbon::hasFormat($started_time, $timeFormat)) {
-            return response()->json([
-                'success' => false, 
-                'message' => 'started_time must be in H:i:s format (e.g., 14:00:00).'
-            ], 200);
-        }
-    
-        if (!Carbon::hasFormat($ended_time, $timeFormat)) {
-            return response()->json([
-                'success' => false, 
-                'message' => 'ended_time must be in H:i:s format (e.g., 14:00:00).'
-            ], 200);
-          }
 
-    $call = UserCalls::where('id', $call_id)
-                     ->first();
+    $timeFormat = 'H:i:s';
+    
+    if (!Carbon::hasFormat($started_time, $timeFormat)) {
+        return response()->json([
+            'success' => false, 
+            'message' => 'started_time must be in H:i:s format (e.g., 14:00:00).'
+        ], 200);
+    }
+    
+    if (!Carbon::hasFormat($ended_time, $timeFormat)) {
+        return response()->json([
+            'success' => false, 
+            'message' => 'ended_time must be in H:i:s format (e.g., 14:00:00).'
+        ], 200);
+    }
+
+    $call = UserCalls::where('id', $call_id)->first();
 
     if (!$call) {
         return response()->json([ 
@@ -1290,15 +1302,19 @@ public function update_connected_call(Request $request)
             'message' => 'Call not found.',
         ], 200);
     }
+    
     $user = Users::find($user_id);
 
-  // Convert the times to Carbon instances with today's date
-  $currentDate = Carbon::now()->format('Y-m-d'); // Current date
-  $startTime = Carbon::createFromFormat('Y-m-d H:i:s', "$currentDate $started_time"); // Add the date
-  $endTime = Carbon::createFromFormat('Y-m-d H:i:s', "$currentDate $ended_time"); // Add the date
+    // Convert the times to Carbon instances with today's date
+    $currentDate = Carbon::now()->format('Y-m-d'); // Current date
+    $startTime = Carbon::createFromFormat('Y-m-d H:i:s', "$currentDate $started_time"); // Add the date
+    $endTime = Carbon::createFromFormat('Y-m-d H:i:s', "$currentDate $ended_time"); // Add the date
 
-  // Calculate duration in minutes (ensure at least 1 minute)
-  $durationMinutes = max($endTime->diffInMinutes($startTime), 1);
+    // Calculate the duration in seconds
+    $durationSeconds = $endTime->diffInSeconds($startTime);
+
+    // Calculate duration in minutes (ensure at least 1 minute)
+    $durationMinutes = max($endTime->diffInMinutes($startTime), 1);
 
     // Calculate spend coins and income
     $coinsPerMinute = 10;
@@ -1307,10 +1323,16 @@ public function update_connected_call(Request $request)
     $coins_spend = $durationMinutes * $coinsPerMinute;
     $income = $durationMinutes * $incomePerMinute;
 
+    // Only deduct coins if the duration is 10 seconds or more
+    if ($durationSeconds >= 10) {
+        $user->coins -= $coins_spend; // Deduct coins only if duration >= 10 seconds
+        $user->save();
+    } else {
+        $coins_spend = 0; // No coins deducted if duration is less than 10 seconds
+        $income = 0; // No coins deducted if duration is less than 10 seconds
+    }
 
-    $user->coins -= $coins_spend;
-    $user->save();
-
+    // Update call details
     $call->started_time = $startTime->format('H:i:s');
     $call->ended_time = $endTime->format('H:i:s'); 
     $call->coins_spend = $coins_spend;
@@ -1318,7 +1340,6 @@ public function update_connected_call(Request $request)
     $call->save();
 
     $receiver = Users::find($call->call_user_id);
-  
 
     return response()->json([
         'success' => true,
@@ -1329,8 +1350,8 @@ public function update_connected_call(Request $request)
             'user_name' => $user->name,
             'call_user_id' => $call->call_user_id,
             'call_user_name' => $receiver ? $receiver->name : '',
-            'coins_spend' =>$call-> coins_spend,
-            'income' =>$call-> income,
+            'coins_spend' => $call->coins_spend,
+            'income' => $call->income,
             'started_time' => $call->started_time,
             'ended_time' => $call->ended_time,
             'date_time' => Carbon::parse($call->datetime)->format('Y-m-d H:i:s'),
@@ -1377,13 +1398,19 @@ public function calls_list(Request $request)
         ], 200);
     }
 
-    // Query based on gender
+    // Query based on gender and filter out calls with empty started_time
     if ($gender === 'male') {
-        // Male: Check where user_id matches
-        $calls = UserCalls::where('user_id', $user_id)->get();
+        // Male: Check where user_id matches and started_time is not empty
+        $calls = UserCalls::where('user_id', $user_id)
+            ->whereNotNull('started_time')
+            ->where('started_time', '!=', '')
+            ->get();
     } else {
-        // Female: Check where call_user_id matches
-        $calls = UserCalls::where('call_user_id', $user_id)->get();
+        // Female: Check where call_user_id matches and started_time is not empty
+        $calls = UserCalls::where('call_user_id', $user_id)
+            ->whereNotNull('started_time')
+            ->where('started_time', '!=', '')
+            ->get();
     }
 
     // Check if no calls found
@@ -1430,6 +1457,7 @@ public function calls_list(Request $request)
             $avatar = Avatars::find($receiver->avatar_id);
             $imageUrl = ($avatar && $avatar->image) ? asset('storage/app/public/avatars/' . $avatar->image) : '';
         }
+
         // Add data to response array based on gender
         if ($gender === 'male') {
             // For male users, include audio and video status
@@ -1462,5 +1490,6 @@ public function calls_list(Request $request)
         'data' => $callData,
     ], 200);
 }
+
 
 }
