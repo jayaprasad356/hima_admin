@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\coinsStoreRequest;
 
-class SpeechTextController extends Controller
+class CoinsController extends Controller
 {
     /**
      * Display a listing of the resource.

@@ -13,6 +13,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\HomeController;    
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CoinsController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\AppsettingsController;
@@ -109,6 +110,13 @@ Route::prefix('admin')->middleware('auth')->group(function () {
       Route::delete('/points/{points}', [PointsController::class, 'destroy'])->name('points.destroy');
       Route::put('/points/{points}', [PointsController::class, 'update'])->name('points.update');
       Route::post('/points', [PointsController::class, 'store'])->name('points.store');
+
+      Route::get('/coins', [CoinsController::class, 'index'])->name('coins.index');
+      Route::get('/coins/create', [CoinsController::class, 'create'])->name('coins.create');
+      Route::get('/coins/{coins}/edit', [CoinsController::class, 'edit'])->name('coins.edit');
+      Route::delete('/coins/{coins}', [CoinsController::class, 'destroy'])->name('coins.destroy');
+      Route::put('/coins/{coins}', [CoinsController::class, 'update'])->name('coins.update');
+      Route::post('/coins', [CoinsController::class, 'store'])->name('coins.store');
 
         //Chat Points  
         Route::get('/chat_points', [Chat_pointsController::class, 'index'])->name('chat_points.index');

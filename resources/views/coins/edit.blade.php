@@ -55,7 +55,7 @@
                         <label for="popular">Popular</label>
                         <div class="custom-control custom-switch">
                             <input type="hidden" name="popular" value="0"> <!-- Hidden input to ensure a value is always submitted -->
-                            <input type="checkbox" name="popular" class="custom-control-input @error('popular') is-invalid @enderror" id="popular" value="1" {{ old('popular', $users->popular) == '1' ? 'checked' : '' }}>
+                            <input type="checkbox" name="popular" class="custom-control-input @error('popular') is-invalid @enderror" id="popular" value="1" {{ old('popular', $coins->popular) == '1' ? 'checked' : '' }}>
                             <label class="custom-control-label" for="popular"></label>
                         </div>
                         @error('popular')

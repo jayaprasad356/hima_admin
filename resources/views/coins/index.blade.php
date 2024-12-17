@@ -46,7 +46,12 @@
                         <td>{{$coin->price}}</td>
                         <td>{{$coin->coins}}</td>
                         <td>{{$coin->save}}</td>
-                        <td>{{$coin->Popular}}</td>
+                        <td>
+                        <span class="{{ $coin->popular == 1 ? 'text-enable' : 'text-disable' }}">
+                                {{ $coin->popular == 1 ? 'Enable' : 'Disable' }}
+                            </span>
+                        </td>
+
                     </tr>
                     @endforeach
                 </tbody>

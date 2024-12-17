@@ -55,7 +55,7 @@
                         <input type="hidden" name="popular" value="0"> <!-- Default value -->
                         <input type="checkbox" name="popular" class="custom-control-input" id="popular" value="1" 
                                {{ old('popular', 0) == 1 ? 'checked' : '' }}>
-                        <label class="custom-control-label" for="popular">Enable Popular</label>
+                        <label class="custom-control-label" for="popular"></label>
                     </div>
                 </div>
              
