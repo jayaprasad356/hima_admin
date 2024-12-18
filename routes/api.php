@@ -25,6 +25,8 @@ use App\Http\Controllers\AuthControllerApi;
  Route::post('random_user', [AuthController::class, 'random_user']);
  Route::post('update_connected_call', [AuthController::class, 'update_connected_call']);
  Route::post('calls_list', [AuthController::class, 'calls_list']);
+ Route::post('call_female_user', [AuthController::class, 'call_female_user']);
+ Route::post('female_call_attend', [AuthController::class, 'female_call_attend']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

@@ -1117,7 +1117,133 @@ public function calls_status_update(Request $request)
     ], 200);
 }
 
+public function call_female_user(Request $request)
+{
+    // Retrieve input values
+    $user_id = $request->input('user_id');  
+    $call_user_id = $request->input('call_user_id');
+    $call_type = $request->input('call_type');
 
+    // Validate user_id
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    // Find the user
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 200);
+    }
+
+    // Validate call_user_id
+    if (empty($call_user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'call_user_id is empty.',
+        ], 200);
+    }
+
+    // Ensure user_id and call_user_id are not the same
+    if ($user_id == $call_user_id) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User cannot call themselves.',
+        ], 200);
+    }
+
+    // Find the call user
+    $call_user = Users::find($call_user_id);
+    if (!$call_user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Call User not found.',
+        ], 200);
+    }
+
+    // Validate call_type
+    if (empty($call_type)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'call_type is empty.',
+        ], 200);
+    }
+
+    if (!in_array($call_type, ['audio', 'video'])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid call_type. It must be either "audio" or "video".',
+        ], 200);
+    }
+
+    if ($user->coins < 10) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Insufficient coins.',
+        ], 200);
+    }
+
+    $balance_time = '';
+    $coins = $user->coins;
+    
+    // Calculate balance time in minutes and seconds
+    $minutes = floor($coins / 10); // For every 10 coins, 1 minute
+    $seconds = 0; // Assume no partial seconds for simplicity
+    $balance_time = sprintf('%d:%02d', $minutes, $seconds);
+
+
+    // Insert call data into users_call table
+    $usersCalls = UserCalls::create([
+        'user_id' => $user->id,
+        'call_user_id' => $call_user_id,
+        'type' => $call_type,
+        'datetime' => now(),
+    ]);
+
+    // Fetch inserted call data
+    $insertedCallData = UserCalls::find($usersCalls->id);
+
+    // Fetch names of the users from the users table
+    $caller = Users::find($insertedCallData->user_id);
+    $receiver = Users::find($insertedCallData->call_user_id);
+
+
+    // Fetch avatar image for receiver
+    $receiverAvatar = Avatars::find($receiver->avatar_id);
+    $receiverImageUrl = ($receiverAvatar && $receiverAvatar->image) ? asset('storage/app/public/avatars/' . $receiverAvatar->image) : '';
+
+       // Fetch avatar image for caller if needed
+       $callerAvatar = Avatars::find($caller->avatar_id);
+       $callerImageUrl = ($callerAvatar && $callerAvatar->image) ? asset('storage/app/public/avatars/' . $callerAvatar->image) : '';
+   
+   
+    // Return response with success and inserted call data
+    return response()->json([
+        'success' => true,
+        'message' => 'Data created successfully.',
+        'data' => [
+            'call_id' => $insertedCallData->id,
+            'user_id' => $insertedCallData->user_id,
+            'user_name' => $caller ? $caller->name : '',
+            'user_avatar_image' => $callerImageUrl,
+            'call_user_id' => $insertedCallData->call_user_id,
+            'call_user_name' => $receiver ? $receiver->name : '',
+            'call_user_avatar_image' => $receiverImageUrl,
+            'type' => $insertedCallData->type,
+            'started_time' => $insertedCallData->started_time ?? '',
+            'ended_time' => $insertedCallData->ended_time ?? '',
+            'coins_spend' => $insertedCallData->coins_spend ?? '',
+            'income' => $insertedCallData->income?? '',
+            'balance_time' => $balance_time,
+            'date_time' => Carbon::parse($insertedCallData->date_time)->format('Y-m-d H:i:s'),
+        ],
+    ], 200);
+}
 public function random_user(Request $request)
 {
     // Retrieve input values
@@ -1492,5 +1618,88 @@ public function calls_list(Request $request)
     ], 200);
 }
 
+public function female_call_attend(Request $request)
+{
+    // Retrieve input values
+    $call_id = $request->input('call_id');
+    $user_id = $request->input('user_id');
+    $started_time = $request->input('started_time');
 
+    if (empty($call_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'call_id is empty.',
+        ], 200);
+    }
+
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    $timeFormat = 'H:i:s';
+    if (!Carbon::hasFormat($started_time, $timeFormat)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'started_time must be in H:i:s format (e.g., 14:00:00).',
+        ], 200);
+    }
+
+    // Check if the call_id and user_id match in user_calls table
+    $userCall = UserCalls::where('id', $call_id)
+                         ->where('user_id', $user_id)
+                         ->first();
+
+    if (!$userCall) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No matching record found for the provided call_id and user_id.',
+        ], 200);
+    }
+
+    // Update the started_time
+    $userCall->started_time = $started_time;
+    $userCall->save();
+
+    // Find the user and fetch balance time
+    $user = Users::find($user_id);
+    $coins = $user ? $user->coins : 0;
+    $minutes = floor($coins / 10); // For every 10 coins, 1 minute
+    $seconds = 0;
+    $balance_time = sprintf('%d:%02d', $minutes, $seconds);
+
+    // Fetch names and avatar images for caller and receiver
+    $caller = Users::find($userCall->user_id);
+    $receiver = Users::find($userCall->call_user_id);
+
+    $callerAvatar = Avatars::find($caller->avatar_id);
+    $callerImageUrl = ($callerAvatar && $callerAvatar->image) ? asset('storage/app/public/avatars/' . $callerAvatar->image) : '';
+
+    $receiverAvatar = Avatars::find($receiver->avatar_id);
+    $receiverImageUrl = ($receiverAvatar && $receiverAvatar->image) ? asset('storage/app/public/avatars/' . $receiverAvatar->image) : '';
+
+    // Return response
+    return response()->json([
+        'success' => true,
+        'message' => 'started_time updated successfully.',
+        'data' => [
+            'call_id' => $userCall->id,
+            'user_id' => $userCall->user_id,
+            'user_name' => $caller ? $caller->name : '',
+            'user_avatar_image' => $callerImageUrl,
+            'call_user_id' => $userCall->call_user_id,
+            'call_user_name' => $receiver ? $receiver->name : '',
+            'call_user_avatar_image' => $receiverImageUrl,
+            'type' => $userCall->type,
+            'started_time' => $userCall->started_time,
+            'ended_time' => $userCall->ended_time ?? '',
+            'coins_spend' => $userCall->coins_spend ?? '',
+            'income' => $userCall->income ?? '',
+            'remaining_time' => $balance_time,
+            'date_time' => Carbon::parse($userCall->date_time)->format('Y-m-d H:i:s'),
+        ],
+    ], 200);
+}
 }
