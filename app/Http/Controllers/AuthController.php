@@ -1429,7 +1429,15 @@ public function update_connected_call(Request $request)
             'message' => 'Call not found.',
         ], 200);
     }
-    
+
+    // Check if the call has already been updated with an ended_time
+    if (!empty($call->ended_time)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Call has already been updated.',
+        ], 200);
+    }
+
     $user = Users::find($user_id);
 
     // Convert the times to Carbon instances with today's date
@@ -1485,7 +1493,6 @@ public function update_connected_call(Request $request)
         ],
     ], 200);
 }
-
 
 
 public function calls_list(Request $request)
