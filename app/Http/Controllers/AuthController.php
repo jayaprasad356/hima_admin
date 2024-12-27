@@ -918,11 +918,13 @@ public function female_users_list(Request $request)
     $offset = $request->input('offset', 0);
     $limit = $request->input('limit', 10); // Default limit to 10 if not provided
 
-    // Count total female users
-    $totalCount = Users::where('gender', 'female')->count();
+    // Count total female users with status = 1
+    $totalCount = Users::where('gender', 'female')->where('status', 1)->count();
 
-    // Retrieve paginated female users
+    // Retrieve paginated female users with status = 1 and order by latest
     $Users = Users::where('gender', 'female')
+        ->where('status', 1)
+        ->orderBy('datetime', 'desc')
         ->skip($offset)
         ->take($limit)
         ->with('avatar') // Only eager load the avatar relationship if necessary
@@ -1571,12 +1573,11 @@ public function calls_list(Request $request)
             // Calculate difference in seconds
             $durationSeconds = $startTime->diffInSeconds($endTime);
             
-            // Convert total seconds to minutes and seconds
-            $durationMinutes = floor($durationSeconds / 60); // Minutes
-            $durationSeconds = $durationSeconds % 60; // Remaining seconds
+            // Convert total seconds to minutes (round up to the next minute)
+            $durationMinutes = ceil($durationSeconds / 60);
 
-            // Format duration as i:s (e.g., 5:45)
-            $duration = sprintf('%d:%02d', $durationMinutes, $durationSeconds);
+            // Format duration as minutes
+            $duration = sprintf('%d min', $durationMinutes);
         }
 
         // For female gender, we return income
@@ -1612,7 +1613,7 @@ public function calls_list(Request $request)
             // For female users, include income
             $callData[] = [
                 'id' =>$call->call_user_id,
-                'name' => $receiver ? $receiver->name : '',
+                'name' => $caller ? $receiver->name : '',
                 'image' => $imageUrl,
                 'started_time' => $call->started_time ?? '',
                 'duration' => $duration,
