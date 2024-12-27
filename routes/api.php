@@ -28,6 +28,7 @@ use App\Http\Controllers\AuthControllerApi;
  Route::post('call_female_user', [AuthController::class, 'call_female_user']);
  Route::post('female_call_attend', [AuthController::class, 'female_call_attend']);
  Route::post('appsettings_list', [AuthController::class, 'appsettings_list']);
+ Route::post('reports', [AuthController::class, 'reports']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
