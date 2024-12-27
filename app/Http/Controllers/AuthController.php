@@ -1612,8 +1612,8 @@ public function calls_list(Request $request)
         } elseif ($gender === 'female') {
             // For female users, include income
             $callData[] = [
-                'id' =>$call->call_user_id,
-                'name' => $caller ? $receiver->name : '',
+                'id' =>$call->user_id,
+                'name' => $caller ? $caller->name : '',
                 'image' => $imageUrl,
                 'started_time' => $call->started_time ?? '',
                 'duration' => $duration,
