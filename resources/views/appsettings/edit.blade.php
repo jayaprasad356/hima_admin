@@ -25,37 +25,9 @@
                 <textarea name="description" id="description" class="form-control" rows="10" required>{!! old('description', $appsettings->description) !!}</textarea>
             </div>
 
-            <div class="form-group">
-                <label for="login">Log In</label>
-                <div class="custom-control custom-switch">
-                    <input type="hidden" name="login" value="0"> <!-- Hidden input to ensure a value is always submitted -->
-                    <input type="checkbox" name="login" class="custom-control-input @error('login') is-invalid @enderror" id="login" value="1" {{ old('login', $appsettings->login) == '1' ? 'checked' : '' }}>
-                    <label class="custom-control-label" for="login"></label>
-                </div>
-                @error('login')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
-            </div>
-
+      
             <!-- Mode Field -->
-            <div class="form-group">
-                <label for="call_mode">Call Mode</label>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="call_mode" id="call_mode_testing" value="testing" {{ old('call_mode', $appsettings->call_mode) == 'testing' ? 'checked' : '' }}>
-                    <label class="form-check-label" for="call_mode_testing">testing</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="call_mode" id="call_mode_live" value="live" {{ old('call_mode', $appsettings->call_mode) == 'live' ? 'checked' : '' }}>
-                    <label class="form-check-label" for="call_mode_live">live</label>
-                </div>
-                @error('call_mode')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
-            </div>
+            
 
             <div class="box-footer">
                 <button type="submit" class="btn btn-primary">Update</button>

@@ -13,6 +13,7 @@ use App\Models\DeletedUsers;
 use App\Models\Withdrawals;  
 use App\Models\UserCalls;
 use Carbon\Carbon;
+use App\Models\Appsettings; 
 use App\Models\News; 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -82,6 +83,7 @@ class AuthController extends Controller
             'voice' => $voicePath ?? '',
             'status' => $user->status ?? '',
             'balance' =>(int) $user->balance ?? '',
+            'coins' =>(int) $user->coins ?? '',
             'audio_status' =>(int) $user->audio_status ?? '',
             'video_status' =>(int) $user->video_status ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
@@ -345,6 +347,7 @@ public function update_profile(Request $request)
              'voice' => $voicePath ?? '',
              'status' => $user->status ?? '',
              'balance' => (int) $user->balance ?? '',
+             'coins' => (int) $user->coins ?? '',
              'audio_status' =>(int) $user->audio_status ?? '',
              'video_status' =>(int) $user->video_status ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
@@ -395,6 +398,7 @@ public function userdetails(Request $request)
             'voice' => $voicePath ?? '',
             'status' => $user->status ?? '',
             'balance' =>(int) $user->balance ?? '',
+            'coins' => (int) $user->coins ?? '',
             'audio_status' =>(int) $user->audio_status ?? '',
             'video_status' =>(int) $user->video_status ?? '',
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
@@ -579,7 +583,7 @@ public function send_otp(Request $request)
 
     // Define the API URL and parameters for OTP sending
     $apiUrl = 'https://api.authkey.io/request'; 
-    $authKey = '64045a300411033f'; // Your authkey here
+    $authKey = '673e807e1f672335'; // Your authkey here
     $sid = '14324'; // SID, if applicable
 
     // Make the HTTP request to the OTP API
@@ -1707,6 +1711,86 @@ public function female_call_attend(Request $request)
             'remaining_time' => $balance_time,
             'date_time' => Carbon::parse($userCall->date_time)->format('Y-m-d H:i:s'),
         ],
+    ], 200);
+}
+public function reports(Request $request)
+{
+    // Get user_id from request
+    $user_id = $request->input('user_id');
+
+    // Validate user_id
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    // Fetch the user based on user_id to check if the user is female
+    $user = users::find($user_id);
+
+    if (!$user) {
+        return response()->json([ 
+            'success' => false,
+            'message' => 'User not found.',
+        ], 200);
+    }
+
+    // Check if the user is female
+    if ($user->gender !== 'female') {
+        return response()->json([
+            'success' => false,
+            'message' => 'User is not female.',
+        ], 200);
+    }
+
+
+    $callCount = UserCalls::where('call_user_id', $user_id)
+        ->whereDate('datetime', now()->toDateString())
+        ->count();
+
+    // Get the total earnings today for this user
+    $today_earnings = UserCalls::where('call_user_id', $user_id)
+        ->whereDate('datetime', now()->toDateString())
+        ->sum('income');
+
+    // Prepare and return the response with the data
+    return response()->json([
+        'success' => true,
+        'message' => 'Reports listed successfully.',
+        'data' => [[
+            'user_name' => $user->name,
+            'today_calls' => $callCount,
+            'today_earnings' => $today_earnings,
+        ]],
+    ], 200);
+}
+public function appsettings_list(Request $request)
+{
+    // Retrieve all news settings
+    $appsettings = Appsettings::all();
+
+    if ($appsettings->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No Appsettings found.',
+        ], 404);
+    }
+
+    $appsettingsData = [];
+    foreach ($appsettings as $item) {
+        $appsettingsData[] = [
+            'id' => $item->id,
+            'link' => $item->link,
+            'app_version' => $item->app_version,
+            'description' => $item->description,
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'App Settings listed successfully.',
+        'data' => $appsettingsData,
     ], 200);
 }
 }

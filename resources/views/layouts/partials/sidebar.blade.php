@@ -70,6 +70,13 @@
                     </a>
                 </li>
 
+                <li class="nav-item has-treeview">
+                    <a href="{{ route('appsettings.edit') }}" class="nav-link {{ activeSegment('appsettings') }}">
+                        <i class="nav-icon fas fa-gear"></i>
+                        <p>App Update</p>
+                    </a>
+                </li>
+
                 <li class="nav-item">
                     <a href="#" class="nav-link" onclick="document.getElementById('logout-form').submit()">
                         <i class="nav-icon fas fa-power-off"></i>

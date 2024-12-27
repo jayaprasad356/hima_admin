@@ -7,6 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Appsettings extends Model
 {
     protected $fillable = [
-          'link', 'app_version','description','call_mode',
+          'link', 'app_version','description',
     ];
 }   
