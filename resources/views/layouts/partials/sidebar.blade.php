@@ -71,7 +71,7 @@
                 </li>
 
                 <li class="nav-item has-treeview">
-                    <a href="{{ route('appsettings.edit') }}" class="nav-link {{ activeSegment('appsettings') }}">
+                    <a href="{{ route('appsettings.edit', 1) }}" class="nav-link {{ activeSegment('appsettings') }}">
                         <i class="nav-icon fas fa-gear"></i>
                         <p>App Update</p>
                     </a>
