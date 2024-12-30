@@ -919,11 +919,11 @@ public function female_users_list(Request $request)
     $limit = $request->input('limit', 10); // Default limit to 10 if not provided
 
     // Count total female users with status = 1
-    $totalCount = Users::where('gender', 'female')->where('status', 1)->count();
+    $totalCount = Users::where('gender', 'female')->where('status', 2)->count();
 
     // Retrieve paginated female users with status = 1 and order by latest
     $Users = Users::where('gender', 'female')
-        ->where('status', 1)
+        ->where('status', 2)
         ->orderBy('datetime', 'desc')
         ->skip($offset)
         ->take($limit)
