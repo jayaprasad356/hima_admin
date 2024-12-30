@@ -1592,8 +1592,8 @@ public function calls_list(Request $request)
         if ($gender === 'male' && $receiver) {
             $avatar = Avatars::find($receiver->avatar_id);
             $imageUrl = ($avatar && $avatar->image) ? asset('storage/app/public/avatars/' . $avatar->image) : '';
-        } elseif ($gender === 'female' && $receiver) {
-            $avatar = Avatars::find($receiver->avatar_id);
+        } elseif ($gender === 'female' && $caller) {
+            $avatar = Avatars::find($caller->avatar_id);
             $imageUrl = ($avatar && $avatar->image) ? asset('storage/app/public/avatars/' . $avatar->image) : '';
         }
 
